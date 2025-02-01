@@ -38,6 +38,7 @@
 │   ├── ingestion/                 # Data acquisition: scraping and merging
 │   │   ├── scrape_pubmed.py       # Scraping abstracts from PubMed
 │   │   └── merge_and_clean.py     # Merging raw CSVs and cleaning the data
+│       └── build_adjacencies.py   # Constructs citation networks from PubMed and CrossRef data (needs to occur after discipline filtering)
 │   ├── preprocessing/             # Filtering and preparing datasets
 │   │   ├── filter_disciplines.py  # Applies the discipline classifier to remove non-neuroscience articles
 │   │   └── prepare_training_data.py  # Generates labeled training sets from cleaned data
@@ -56,8 +57,7 @@
 │   │   ├── analyze_density.py     # Analyzes citation networks and computes density metrics
 │   │   ├── distinguish_clusters.py  # Highlights key differences between similar clusters
 │   │   └── extract_open_questions.py  # Extracts open research questions from review articles
-│   └── utilities/                 # Utility scripts that support multiple stages
-│       └── build_adjacencies.py   # Constructs citation networks from PubMed and CrossRef data
+
 
 ├── src/                           # Shared library code, organized into subpackages
 │   ├── __init__.py
