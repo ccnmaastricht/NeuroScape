@@ -1,0 +1,12 @@
+[setup]
+base_url = 'http://www.ncbi.nlm.nih.gov/pubmed/'
+prefix = "scimagojr "
+suffix = " Subject Area"
+
+[pubmed_requests]
+num_attempts = 10
+sleep_time = 40
+
+[storage]
+items_per_shard = 200
+

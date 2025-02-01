@@ -1,0 +1,6 @@
+year_cutoff = 2023
+
+[word_limit]
+lower = 50
+upper = 500
+

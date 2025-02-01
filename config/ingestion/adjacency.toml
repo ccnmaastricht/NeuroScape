@@ -1,0 +1,6 @@
+[pubmed_requests]
+num_attempts = 10
+sleep_time = 30
+
+[storage]
+items_per_shard = 200
