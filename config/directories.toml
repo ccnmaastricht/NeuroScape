@@ -6,14 +6,18 @@ reference = 'Internal/Reference'
 [internal.reference]
 scimago = 'Internal/Reference/Scimago'
 
+[internal.manuscript]
+figures = 'Figures'
+tables = 'Tables'
+
 [internal.intermediate]
 csv = 'Internal/Intermediate/CSV'
 graphs = 'Internal/Intermediate/Graphs'
 models = 'Internal/Intermediate/Models'
 
-[internal.intermediate.embeddings]
-voyage = 'Internal/Intermediate/Embeddings/Voyage_Lite_02_Instruct'
-neuro = 'Internal/Intermediate/Embeddings/Custom_Neuro'
+[internal.intermediate.hdf5]
+voyage = 'Internal/Intermediate/HDF5/With_Voyage_Embeddings'
+neuro = 'Internal/Intermediate/HDF5/With_Custom_Embeddings'
 
 [public]
 csv = 'Public/CSV'
