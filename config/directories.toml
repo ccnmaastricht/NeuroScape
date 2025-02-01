@@ -1,0 +1,25 @@
+[internal]
+checkpoints = 'Internal/CheckPoints'
+raw = 'Internal/Raw/CSV'
+reference = 'Internal/Reference'
+
+[internal.reference]
+scimago = 'Internal/Reference/Scimago'
+
+[internal.intermediate]
+csv = 'Internal/Intermediate/CSV'
+graphs = 'Internal/Intermediate/Graphs'
+models = 'Internal/Intermediate/Models'
+
+[internal.intermediate.embeddings]
+voyage = 'Internal/Intermediate/Embeddings/Voyage_Lite_02_Instruct'
+neuro = 'Internal/Intermediate/Embeddings/Custom_Neuro'
+
+[public]
+csv = 'Public/CSV'
+graphs = 'Public/Graphs'
+models = 'Public/Models'
+
+[public.embeddings]
+voyage = 'Public/Embeddings/Voyage_Lite_02_Instruct'
+neuro = 'Public/Embeddings/Custom_Neuro'
