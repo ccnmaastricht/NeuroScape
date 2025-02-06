@@ -10,4 +10,4 @@ Neuroscience Landscape
 4. prepare training data for discipline classifier
 5. train discipline classifier
 6. filter data using discipline classifier
-7. shard hdf5 data
+7. build adjacency matrix
