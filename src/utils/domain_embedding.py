@@ -210,3 +210,18 @@ def validate(model, X_val, info_nce_loss):
         loss = info_nce_loss(Y_val)
 
     return loss.item()
+
+
+def perform_domain_embedding(model, original_embeddings, device):
+    """
+    Embed the original embeddings in a lower-dimensional space.
+
+    Parameters:
+    - original_embeddings: np.ndarray
+
+    Returns:
+    - np.ndarray: The low-dimensional embeddings.
+    """
+    X = torch.tensor(original_embeddings, dtype=torch.float32).to(device)
+    Y = model(X)
+    return Y.detach().cpu().numpy()
