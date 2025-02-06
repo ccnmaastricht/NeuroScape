@@ -1,0 +1,33 @@
+[preparation]
+item_threshold = 200
+
+[model]
+device = "cuda"
+layer_sizes = [1024, 256, 64]
+num_classes = 26
+
+[pretraining]
+epochs = 25
+buffer_size = 5
+batch_size = 64
+learning_rate = 0.0002
+confidence_cutoff = 0
+
+[training]
+epochs = 50
+buffer_size = 5
+batch_size = 64
+learning_rate = 0.0002
+confidence_cutoff = 0.99
+
+[finetuning]
+epochs = 10
+buffer_size = 5
+batch_size = 64
+learning_rate = 0.0002
+confidence_cutoff = 0
+
+[filtering]
+confidence_cutoff = 0.8
+class_index = 19
+shard_size = 200
