@@ -14,6 +14,7 @@ tables = 'Tables'
 csv = 'Internal/Intermediate/CSV'
 graphs = 'Internal/Intermediate/Graphs'
 models = 'Internal/Intermediate/Models'
+embeddings = 'Internal/Intermediate/Embeddings'
 
 [internal.intermediate.hdf5]
 voyage = 'Internal/Intermediate/HDF5/With_Voyage_Embeddings'
