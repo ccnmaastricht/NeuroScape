@@ -18,8 +18,8 @@ embeddings = 'Internal/Intermediate/Embeddings'
 classifier = 'Internal/Intermediate/Embeddings/Classifier'
 
 [internal.intermediate.hdf5]
-voyage = 'Internal/Intermediate/HDF5/With_Voyage_Embeddings'
-neuro = 'Internal/Intermediate/HDF5/With_Custom_Embeddings'
+voyage = 'Internal/Intermediate/HDF5/VoyageAIEmbeddings'
+neuro = 'Internal/Intermediate/HDF5/DomainEmbeddings'
 
 [public]
 csv = 'Public/CSV'
