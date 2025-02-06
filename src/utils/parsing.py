@@ -50,25 +50,3 @@ def parse_discipline():
     discpline = parse_args().discipline
 
     return discpline
-
-
-def get_disciplines(dataframe, pmids):
-    """
-    Get the disciplines of a paper given its pubmed id(s).
-
-    Parameters:
-    - dataframe: pd.DataFrame
-    - pmids: int or list
-
-    Returns:
-    - list: A list of disciplines.
-    """
-    if isinstance(pmids, list):
-        return [
-            dataframe['Disciplines'][dataframe['Pmid'] ==
-                                     pmid].values[0].split(' / ')
-            for pmid in pmids
-        ]
-    else:
-        return dataframe['Disciplines'][dataframe['Pmid'] ==
-                                        pmids].values[0].split(' / ')
