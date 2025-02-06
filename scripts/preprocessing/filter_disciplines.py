@@ -80,6 +80,10 @@ def filter(embedding_files, dataframe, device, model, class_index, cutoff):
 
 if __name__ == '__main__':
     configurations = load_configurations()
+    items_per_shard = configurations['filtering']['shard_size']
+    neuro_class_index = configurations['filtering']['class_index']
+    confidence_cutoff = configurations['filtering']['confidence_cutoff']
+
     data_directories = parse_directories()
 
     model_file = os.path.join(
@@ -104,8 +108,6 @@ if __name__ == '__main__':
         BASEPATH, data_directories['internal']['intermediate']['embeddings'],
         'Neuroscience')
 
-    neuro_class_index = configurations['filtering']['class_index']
-    confidence_cutoff = configurations['filtering']['confidence_cutoff']
     filtered_data = []
 
     multi_dataframe = pd.read_csv(
@@ -138,12 +140,26 @@ if __name__ == '__main__':
     filtered_data.extend(multi_filtered_data)
     filtered_data.extend(neuro_filtered_data)
 
+    output_directory = os.path.join(
+        BASEPATH,
+        data_directories['internal']['intermediate']['hdf5']['voyage'])
+
+    os.makedirs(output_directory, exist_ok=True)
+
     df_output_file = os.path.join(neuroscience_dataframe_dir,
                                   'merged_filtered.csv')
-    emb_output_file = os.path.join(neuroscience_embedding_dir,
-                                   'merged_filtered.hdf5')
+    emb_output_file = os.path.join(output_directory, 'merged_filtered.h5')
 
     print('Saving data...')
     dataframe.to_csv(df_output_file, index=False)
 
-    save_articles_to_hdf5(filtered_data, emb_output_file)
+    # Saving the articles as shards of hdf5 files
+    print('Saving articles...')
+    os.makedirs(output_directory, exist_ok=True)
+    for i, start in tqdm(
+            enumerate(range(0, len(filtered_data), items_per_shard))):
+        file_name = os.path.join(output_directory, f'shard_{i:04d}.h5')
+        end = start + items_per_shard
+        save_articles_to_hdf5(filtered_data[start:end],
+                              file_name,
+                              disable_tqdm=True)
