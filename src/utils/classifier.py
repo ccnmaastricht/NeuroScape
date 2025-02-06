@@ -1,6 +1,10 @@
 import os
+import torch
 import pickle
 import tomllib
+import numpy as np
+
+from sklearn.metrics import accuracy_score
 
 from src.classes.data_types import EmbeddingsWithLabels
 
@@ -16,6 +20,9 @@ def load_configurations():
         configurations = tomllib.load(f)
 
     return configurations
+
+
+# Utility functions for preparing the data for training the classifier
 
 
 def get_unique_disciplines_and_count(dataframe):
@@ -149,3 +156,178 @@ def get_disciplines(dataframe, pmids):
     else:
         return dataframe['Disciplines'][dataframe['Pmid'] ==
                                         pmids].values[0].split(' / ')
+
+
+# Utility functions for training the classifier
+
+
+def train_one_epoch(model, X, Y, loss_function, optimizer):
+    """
+    Train the model for one epoch.
+
+    Parameters:
+    - model: PyTorch model 
+    - X: Tensor of shape [batch_size, num_features] containing the input features.
+    - Y: Tensor of shape [batch_size, num_classes] containing the true class labels.
+    - loss_function: PyTorch loss function.
+    - optimizer: PyTorch optimizer.
+
+    Returns:
+    - loss: Float, the loss value.
+    """
+    model.train()
+    optimizer.zero_grad()
+    Y_pred = model(X)
+    loss = loss_function(Y_pred, Y)
+    loss.backward()
+    optimizer.step()
+    return loss.item()
+
+
+def compute_multiclass_accuracy(Y_pred, Y_true):
+    """
+    Compute the multiclass accuracy.
+
+    Parameters:
+    - Y_pred: Numpy array of shape [batch_size, num_classes] containing the model's predictions.
+    - Y_true: Numpy array of shape [batch_size, num_classes] containing the true class labels.
+
+    Returns:
+    - accuracy: Float, the multiclass accuracy.
+    """
+    Y_pred_classes = (Y_pred > 0.5).astype(int)
+    Y_true_classes = Y_true.astype(int)
+    accuracy = accuracy_score(Y_true_classes, Y_pred_classes)
+    return accuracy
+
+
+def compute_expected_accuracy(Y):
+    """
+    Compute the expected accuracy.
+
+    Parameters:
+    - Y: Numpy array of shape [num_samples, num_classes] containing the class labels.
+
+    Returns:
+    - expected_accuracy: Float, the expected accuracy.
+    """
+    items_per_class = np.sum(Y, axis=0)
+    total_items = np.sum(items_per_class)
+    expected_accuracy = np.sum((items_per_class / total_items)**2)
+    return expected_accuracy
+
+
+def compute_kappa(accuracy, expected_accuracy):
+    """
+    Compute the Cohen's Kappa.
+
+    Parameters:
+    - accuracy: Float, the multiclass accuracy.
+    - expected_accuracy: Float, the expected accuracy.
+
+    Returns:
+    - kappa: Float, the Cohen's Kappa.
+    """
+    kappa = (accuracy - expected_accuracy) / (1 - expected_accuracy)
+    return kappa
+
+
+def validate(model, X, Y, loss_function):
+    """
+    Validate the model on the validation set.
+
+    Parameters:
+    - model: PyTorch model
+    - X: Tensor of shape [batch_size, num_features] containing the input features.
+    - Y: Tensor of shape [batch_size, num_classes] containing the true class labels.
+    - loss_function: PyTorch loss function.
+
+    Returns:
+    - loss: Float, the loss value.
+    - accuracy: Float, the multiclass accuracy.
+    """
+    model.eval()
+    Y_pred = model(X)
+    loss = loss_function(Y_pred, Y)
+    accuracy = compute_multiclass_accuracy(Y_pred.cpu().detach().numpy(),
+                                           Y.cpu().detach().numpy())
+    return loss.item(), accuracy
+
+
+def data_loader(files):
+    """
+    Load the data from the files.
+
+    Parameters:
+    - files: List of str, the paths to the files.
+
+    Returns:
+    - X: Numpy array of shape [num_samples, num_features] containing the input features.
+    - Y: Numpy array of shape [num_samples, num_classes] containing the class labels.
+    """
+    X = []
+    Y = []
+    for file in files:
+        with open(file, 'rb') as f:
+            data = pickle.load(f)
+        X.extend(data.embeddings)
+        Y.extend(data.labels)
+    X = np.array(X)
+    Y = np.array(Y)
+    return X, Y
+
+
+def to_device(X, Y, device):
+    """
+    Move the data to the device.
+
+    Parameters:
+    - X: Numpy array of shape [num_samples, num_features] containing the input features.
+    - Y: Numpy array of shape [num_samples, num_classes] containing the class labels.
+    - device: PyTorch device.
+
+    Returns:
+    - X: Tensor of shape [num_samples, num_features] containing the input features.
+    - Y: Tensor of shape [num_samples, num_classes] containing the class labels.
+    """
+    X = torch.tensor(X, dtype=torch.float32).to(device)
+    Y = torch.tensor(Y, dtype=torch.float32).to(device)
+    return X, Y
+
+
+def drop_class(model, X, Y, device, confidence_cutoff):
+    """
+    Drop the classes below the confidence_cutoff.
+
+    Parameters:
+    - model: PyTorch model
+    - X: Numpy array of shape [num_samples, num_features] containing the input features.
+    - Y: Numpy array of shape [num_samples, num_classes] containing the class labels.
+    - device: PyTorch device.
+    - confidence_cutoff: Float, the confidence_cutoff value.
+
+    Returns:
+    - Y: Numpy array of shape [num_samples, num_classes] containing the class labels.
+    """
+    X, _ = to_device(X, Y, device)
+    Y_pred = model(X)
+    class_probs = Y_pred.cpu().detach().numpy()
+    class_probs *= Y
+    confidence = class_probs / np.max(class_probs, axis=1).reshape(-1, 1)
+    drop_indices = confidence < confidence_cutoff
+
+    Y[drop_indices] = 0
+
+    return Y
+
+
+def save_model(model, path):
+    """
+    Save the model to a file.
+
+    Parameters:
+    - model: PyTorch model
+    - path: str, the path to save the model.
+    """
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    torch.save(model.state_dict(), path)
