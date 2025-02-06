@@ -7,25 +7,21 @@
 
 ├── config/                        # All configuration files (TOML)
 │   ├── base_directories.toml      # Base directories relative to BASEPATH (e.g., raw, cleaned, embeddings, graphs, models)
+│   ├── plotting.toml   # Settings for figures and visualization
 │   ├── ingestion/                 # Configurations for data scraping/ingestion
 │   │   ├── scraping.toml
 │   │   └── cleaning.toml
 │   ├── models/                    # Configurations for model training and parameters
-│   │   ├── classifier.toml
-│   │   ├── embedding.toml
-│   │   └── model_training.toml
-│   ├── graphs/                    # Settings for graph construction & community detection
+│   │   ├── discpline_classification.toml
+│   │   ├── domain_embedding.toml
+│   ├── clustering/                    # Settings for graph construction & community detection (clustering of abstracts)
 │   │   ├── graph_construction.toml
 │   │   └── community_detection.toml
 │   ├── analysis/                  # Configurations for downstream cluster analysis
-│   │   ├── cluster_definition.toml
-│   │   ├── cluster_density_analysis.toml
-│   │   ├── cluster_dim_categorical.toml
-│   │   └── cluster_selection.toml
-│   └── plotting/                  # Settings for figures and visualization
-│       ├── figure_one.toml
-│       └── figure_two.toml
-
+│       ├── cluster_definition.toml
+│       ├── cluster_density_analysis.toml
+│       ├── cluster_dim_categorical.toml
+│       └── cluster_selection.toml
 ├── notebooks/                     # Jupyter notebooks for exploration, experiments, and visualization
 │   ├── 00_ingestion.ipynb         # Data scraping and cleaning exploration
 │   ├── 01_preprocessing.ipynb     # Data filtering and training data preparation
@@ -33,7 +29,6 @@
 │   ├── 03_clustering.ipynb        # Graph construction and community detection
 │   ├── 04_analysis.ipynb          # Cluster analysis (density, distinctions, etc.)
 │   └── 05_visualization.ipynb     # Figures and visual results
-
 ├── scripts/                       # Executable scripts for the end-to-end pipeline
 │   ├── ingestion/                 # Data acquisition: scraping and merging
 │   │   ├── scrape_pubmed.py       # Scraping abstracts from PubMed
