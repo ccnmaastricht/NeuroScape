@@ -1,9 +1,9 @@
 [internal]
-checkpoints = 'Internal/CheckPoints'
+checkpoints = 'Internal/Checkpoints'
 raw = 'Internal/Raw/CSV'
-reference = 'Internal/Reference'
 
 [internal.reference]
+reference = 'Internal/Reference'
 scimago = 'Internal/Reference/Scimago'
 
 [internal.manuscript]
