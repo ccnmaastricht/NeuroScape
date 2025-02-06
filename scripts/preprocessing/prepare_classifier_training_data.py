@@ -5,9 +5,10 @@ import pandas as pd
 
 from sklearn.model_selection import train_test_split
 
-from src.utils.classifier import *
 from src.utils.parsing import parse_directories
 from src.classes.data_types import EmbeddingsWithLabels
+from src.utils.classifier import load_configurations, save_and_create_dataset, \
+    load_shard, extract_data, get_disciplines, generate_n_hot_vector, get_unique_disciplines_and_count
 
 from dotenv import load_dotenv, find_dotenv
 
