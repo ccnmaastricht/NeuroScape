@@ -1,0 +1,7 @@
+[community_detection]
+max_resolution_parameter = 1
+num_resolution_parameter = 1000
+
+[graph_construction]
+batch_size = 100
+num_neighbors = 50
