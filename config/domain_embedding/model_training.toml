@@ -1,0 +1,26 @@
+[model]
+device = "cuda"
+input_dimension = 1024
+hidden_dimensions =  [512, 256, 128]
+output_dimension = 64
+
+[training]
+epochs = 2000
+batch_size = 256
+initial_learning_rate = 0.0001
+minimum_learning_rate = 0.00001
+validation_window = 5
+validation_size = 0.05
+
+[InfoNCE]
+temperature = 0.1
+cutoff_values = [0.85, 0.75]
+
+[grokfast_ema]
+alpha = 0.98
+lambda = 2
+
+[regularization]
+dropout = 0.1
+l2_weight = 0.01
+correlation_weight = 0.1
