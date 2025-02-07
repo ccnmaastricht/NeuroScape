@@ -11,3 +11,5 @@ Neuroscience Landscape
 5. train discipline classifier
 6. filter data using discipline classifier
 7. build adjacency matrix
+
+Optional is the possibility to update general embeddings using a different Voyage AI model using the update_embedding script
