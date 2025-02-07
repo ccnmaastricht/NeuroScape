@@ -1,4 +1,4 @@
-model = 'voyage-large-2-instruct'
+model = 'voyage-lite-2-instruct'
 items_per_shard = 200
 
 [api_calls]
