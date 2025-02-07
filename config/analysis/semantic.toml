@@ -1,0 +1,14 @@
+[sampling.definition]
+max_abstract_number = 200
+
+[sampling.dimensions]
+max_abstract_number = 250
+older_cutoff = 2010
+recent_cutoff = 2021
+
+[llm]
+temperature = 1.0
+model_name = 'gpt-4o-2024-08-06'
+delay = 0.2
+retries = 10
+
