@@ -217,3 +217,22 @@ def load_embedding_shards(embeddings_files, disable_tqdm=False):
         pmids.extend(pmids_shard)
 
     return np.concatenate(embeddings, axis=0), pmids
+
+
+def align_to_df(embeddings, pmids, df):
+    """
+    Aligns the order of embeddings and PMIDs to the PMID order in the DataFrame.
+
+    Parameters:
+    embeddings (np.ndarray): The embeddings to align.
+    pmids (np.ndarray): The PMIDs to align.
+    df (pd.DataFrame): The DataFrame to align to.
+
+    Returns:
+    aligned_embeddings (np.ndarray): The aligned embeddings.
+    aligned_pmids (np.ndarray): The aligned PMIDs.
+    """
+    pmids = np.array(pmids)
+    pmid_to_index = {pmid: idx for idx, pmid in enumerate(pmids)}
+    ordered_indices = [pmid_to_index[pmid] for pmid in df['Pmid'].values]
+    return embeddings[ordered_indices], pmids[ordered_indices]
