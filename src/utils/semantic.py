@@ -1,5 +1,6 @@
 import time
 import tomllib
+import numpy as np
 
 
 def load_configurations():
