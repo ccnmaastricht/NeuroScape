@@ -24,7 +24,8 @@ if __name__ == '__main__':
     graph_directory = os.path.join(
         BASEPATH, directories['internal']['intermediate']['graphs'])
 
-    csv_file = os.path.join(csv_directory, 'merged_filtered.csv')
+    csv_file = os.path.join(csv_directory,
+                            'articles_merged_cleaned_filtered.csv')
 
     graph_file = os.path.join(graph_directory, 'article_similarity.graphml')
 
@@ -35,8 +36,10 @@ if __name__ == '__main__':
     print(
         'running Leiden community detection for different resolution parameters'
     )
-    num_resolution_parameter = configurations['num_resolution_parameter']
-    max_resolution_parameter = configurations['max_resolution_parameter']
+    num_resolution_parameter = configurations['community_detection'][
+        'num_resolution_parameter']
+    max_resolution_parameter = configurations['community_detection'][
+        'max_resolution_parameter']
     min_resolution_parameter = max_resolution_parameter / num_resolution_parameter
 
     resolution_parameters = np.linspace(min_resolution_parameter,
@@ -81,10 +84,9 @@ if __name__ == '__main__':
 
     print('saving cluster')
     df = pd.read_csv(csv_file)
-    df['cluster'] = df['Pmid'].map(pmid_cluster)
+    df['Cluster ID'] = df['Pmid'].map(pmid_cluster)
 
-    new_csf_file_name = configurations['csv_file_name'].replace(
-        '.csv', '_clustered.csv')
-    new_csv_file = os.path.join(csv_directory, new_csf_file_name)
+    new_csf_file = csv_file.replace('.csv', '_clustered.csv')
+    new_csv_file = os.path.join(csv_directory, new_csf_file)
 
     df.to_csv(new_csv_file, index=False)
