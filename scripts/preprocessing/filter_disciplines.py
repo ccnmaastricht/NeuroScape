@@ -147,8 +147,9 @@ if __name__ == '__main__':
     os.makedirs(output_directory, exist_ok=True)
 
     df_output_file = os.path.join(neuroscience_dataframe_dir,
-                                  'merged_filtered.csv')
-    emb_output_file = os.path.join(output_directory, 'merged_filtered.h5')
+                                  'articles_merged_cleaned_filtered.csv')
+    emb_output_file = os.path.join(output_directory,
+                                   'articles_merged_cleaned_filtered.h5')
 
     print('Saving data...')
     dataframe.to_csv(df_output_file, index=False)

@@ -34,4 +34,5 @@ if __name__ == '__main__':
 
     print(f'Saving the clean dataframe to {cleaned_directory}.')
     os.makedirs(cleaned_directory, exist_ok=True)
-    df.to_csv(os.path.join(cleaned_directory, 'merged.csv'), index=False)
+    df.to_csv(os.path.join(cleaned_directory, 'articles_merged_cleaned.csv'),
+              index=False)

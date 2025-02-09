@@ -123,9 +123,9 @@ if __name__ == "__main__":
     os.makedirs(os.path.join(monolabel_directory, 'Test'), exist_ok=True)
 
     other_dataframe = pd.read_csv(
-        os.path.join(other_dataframe_directory, 'merged.csv'))
+        os.path.join(other_dataframe_directory, 'articles_merged_cleaned.csv'))
     neuro_dataframe = pd.read_csv(
-        os.path.join(neuro_dataframe_directory, 'merged.csv'))
+        os.path.join(neuro_dataframe_directory, 'articles_merged_cleaned.csv'))
     other_shards = glob.glob(os.path.join(other_embedding_directory, '*.pkl'))
     neuro_shards = glob.glob(os.path.join(neuro_embedding_directory, '*.pkl'))
 

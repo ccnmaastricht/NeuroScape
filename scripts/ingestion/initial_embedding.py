@@ -36,7 +36,7 @@ if __name__ == "__main__":
         BASEPATH, directories['internal']['intermediate']['embeddings'],
         discipline)
 
-    file = os.path.join(df_dir, 'merged.csv')
+    file = os.path.join(df_dir, 'articles_merged_cleaned.csv')
     df = pd.read_csv(file)
 
     embedding_model = VoyageAIEmbeddings(model=model,
