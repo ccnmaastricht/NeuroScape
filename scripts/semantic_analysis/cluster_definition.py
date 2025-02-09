@@ -9,10 +9,10 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers.json import SimpleJsonOutputParser
 
-from src.utils.semantic import load_configurations
 from src.utils.parsing import parse_directories
 from src.utils.hypersphere import get_centroids
 from src.utils.load_and_save import load_embedding_shards, align_to_df
+from src.utils.semantic import load_configurations, safe_dictionary_extraction, get_abstract_strings
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -21,63 +21,7 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 
 BASEPATH = os.environ['BASEPATH']
 
-# Define script specific utility functions
-
-
-def process_dictionary(dictionary):
-    """
-    Process the dictionary extracted from the LLM output.
-
-    Parameters:
-    - dictionary: dict, the LLM output dictionary.
-
-    Returns:
-    - dictionary: dict, the extracted dictionary.
-    """
-
-    try:
-        # Verify that the required fields are present
-        if not all(key in dictionary
-                   for key in ['Keywords', 'Title', 'Description', 'Focus']):
-            raise ValueError("Missing required fields in the LLM output")
-
-        # Join the keywords into a single string
-        dictionary['Keywords'] = '; '.join(dictionary['Keywords'])
-
-        return dictionary
-
-    except Exception:
-        return None
-
-
-def safe_dictionary_extraction(abstracts_text, chain, retries, delay):
-    """
-    Safely extract the dictionary from the LLM output.
-
-    Parameters:
-    - abstracts_text: String, the abstracts text.
-    - chain: LLMChain, the LLM chain to invoke.
-    - retries: int, the number of retries allowed.
-    - delay: int, the delay between retries.
-
-    Returns:
-    - dictionary: dict, the extracted dictionary.
-    """
-
-    attempt = 0
-    while attempt < retries:
-        dictionary = chain.invoke(abstracts_text)
-        cluster_definition = process_dictionary(dictionary)
-        time.sleep(delay)
-        if cluster_definition:
-            return cluster_definition
-        else:
-            attempt += 1
-
-    return None
-
-
-# Deine prompt temlates
+# Define prompt temlates
 DEFINITION_PROMPT = PromptTemplate(
     input_variables=["abstracts"],
     template="""
@@ -117,6 +61,8 @@ if __name__ == '__main__':
     configurations = load_configurations()
     directories = parse_directories()
 
+    required_fields = configurations['definition']['required_fields']
+
     llm = ChatOpenAI(temperature=configurations['llm']['temperature'],
                      model_name=configurations['llm']['model_name'])
     definition_chain = DEFINITION_PROMPT | llm | SimpleJsonOutputParser()
@@ -125,11 +71,11 @@ if __name__ == '__main__':
     csv_directory = os.path.join(
         BASEPATH, directories['internal']['intermediate']['csv'],
         'Neuroscience')
-    article_csv_file = 'merged_filtered_clustered.csv'
+    article_csv_file = 'articles_merged_cleaned_filtered_clustered.csv'
     article_df = pd.read_csv(os.path.join(csv_directory, article_csv_file))
 
     # Define the output path
-    cluster_csv_file = 'defined.csv'
+    cluster_csv_file = 'clusters_defined.csv'
     output_path = os.path.join(csv_directory, cluster_csv_file)
 
     if os.path.exists(output_path):
@@ -185,16 +131,21 @@ if __name__ == '__main__':
         cluster_abstracts = abstracts[labels == label]
 
         number_of_abstracts = min(
-            configurations['sampling']['definition']['max_abstract_number'],
+            configurations['definition']['max_abstract_number'],
             len(cluster_abstracts))
 
-        similarity = centroid.dot(cluster_embeddings.T)
-        top_indices = np.argsort(similarity)[::-1][:number_of_abstracts]
+        cluster_abstracts = get_abstract_strings(centroid, cluster_embeddings,
+                                                 cluster_abstracts,
+                                                 number_of_abstracts)
 
-        cluster_abstracts = '\n\n'.join(cluster_abstracts[top_indices])
+        chain_input = {"abstracts": cluster_abstracts}
         cluster_definition = safe_dictionary_extraction(
-            cluster_abstracts, definition_chain,
+            required_fields, chain_input, definition_chain,
             configurations['llm']['retries'], configurations['llm']['delay'])
+
+        # Join the keywords into a single string
+        cluster_definition['Keywords'] = '; '.join(
+            cluster_definition['Keywords'])
 
         cluster_definition['Cluster ID'] = label
         cluster_definition['Size'] = sum(labels == label)
@@ -211,9 +162,6 @@ if __name__ == '__main__':
                                                                  most_similar]
 
         cluster_definitions.append(cluster_definition)
-
-        print(cluster_definition)
-        break
 
     # Convert the cluster definitions to a DataFrame
     cluster_definitions_df = pd.DataFrame(cluster_definitions)
