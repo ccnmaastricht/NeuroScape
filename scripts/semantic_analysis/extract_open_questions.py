@@ -1,6 +1,4 @@
 import os
-import re
-import time
 import openai
 import pandas as pd
 from glob import glob
@@ -8,12 +6,10 @@ from tqdm import tqdm
 
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from pdfminer.high_level import extract_text
 from langchain_core.output_parsers.json import SimpleJsonOutputParser
 
-from scripts.analysis.cluster_definition import load_configurations
-from utils.hypersphere import get_centroids, align_to_df
-from src.utils.load_and_save import load_embedding_shards
+from src.utils.parsing import parse_directories
+from src.utils.semantic import load_configurations, safe_dictionary_extraction, get_review_text
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -21,125 +17,13 @@ load_dotenv(find_dotenv())
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 BASEPATH = os.environ['BASEPATH']
-
-
-def process_dictionary(dictionary):
-    """
-    Process the dictionary extracted from the LLM output.
-
-    Parameters:
-    - dictionary: dict, the LLM output dictionary.
-
-    Returns:
-    - dictionary: dict, the extracted dictionary.
-    """
-
-    try:
-        # Verify that the required field is present
-        if 'Open Questions' in dictionary:
-            dictionary['Open Questions'] = dictionary[
-                'Open Questions'].replace(',', ';')
-            return dictionary
-        else:
-            raise ValueError(
-                "Missing required 'Open Questions' field in the LLM output")
-
-    except Exception:
-        return None
-
-
-def safe_dictionary_extraction(cluster_title, cluster_definition, reviews,
-                               chain, retries, delay):
-    """
-    Safely extract the dictionary from the LLM output.
-
-    Parameters:
-    - 
-    - chain: LLMChain, the LLM chain to invoke.
-    - retries: int, the number of retries allowed.
-    - delay: int, the delay between retries.
-
-    Returns:
-    - dictionary: dict, the extracted dictionary.
-    """
-
-    attempt = 0
-    chain_input = {
+""" 
+chain_input = {
         "cluster_title": cluster_title,
         "cluster_definition": cluster_definition,
         "reviews": reviews
     }
-    while attempt < retries:
-        dictionary = chain.invoke(chain_input)
-        open_questions = process_dictionary(dictionary)
-        time.sleep(delay)
-        if open_questions:
-            return open_questions
-        else:
-            attempt += 1
-
-    return None
-
-
-def strip_document(document):
-    """
-    Strip the document of any unwanted sections.
-
-    Parameters:
-    - document: str, the document to strip.
-
-    Returns:
-    - document: str, the stripped document.
-    """
-
-    unnecessary_sections = [
-        'references', 'acknowledgements', 'author contributions', 'funding',
-        'funding sources', 'conflict of interest',
-        'conflict of interest statement'
-    ]
-
-    # Convert document to lowercase for case-insensitive matching
-    document_lower = document.lower()
-
-    # Use regular expressions to strip the document starting from 'introduction' or 'main'
-    introduction_match = re.search(r'\bintroduction\b', document_lower,
-                                   re.IGNORECASE)
-    main_match = re.search(r'\bmain\b', document_lower, re.IGNORECASE)
-
-    if introduction_match:
-        document = document[introduction_match.end():]
-    elif main_match:
-        document = document[main_match.end():]
-
-    # Use regular expressions to remove unnecessary sections
-    for section in unnecessary_sections:
-        pattern = re.compile(r'\b' + re.escape(section) + r'\b', re.IGNORECASE)
-        match = pattern.search(document)
-        if match:
-            document = document[:match.start()]
-
-    return document
-
-
-def get_review_text(files):
-    """
-    Get the abstract strings that are most similar to the centroid.
-
-    Parameters:
-    - files: list, the list of pdf files to extract text from.
-
-    Returns:
-    - review_text: str, the review text.
-    """
-
-    review_text = ''
-    for file in files:
-        document = extract_text(file)
-        document = strip_document(document)
-        review_text = f"""{review_text}\n\n{document}"""
-
-    return review_text
-
+"""
 
 # Deine prompt temlates
 QUESTIONS_PROMPT = PromptTemplate(
@@ -177,25 +61,30 @@ QUESTIONS_PROMPT = PromptTemplate(
 
 if __name__ == '__main__':
     configurations = load_configurations()
+    required_fields = configurations['questions']['required_fields']
+    directories = parse_directories()
 
     llm = ChatOpenAI(temperature=configurations['llm']['temperature'],
                      model_name=configurations['llm']['model_name'])
     questions_chain = QUESTIONS_PROMPT | llm | SimpleJsonOutputParser()
 
-    # Load the CSV files
+    # Load the CSV files internal.reference.pdf
+    checkpoint_path = os.path.join(BASEPATH,
+                                   directories['internal']['checkpoints'])
     pdf_directory = os.path.join(BASEPATH,
-                                 configurations['data']['pdf_directory'])
-    csv_directory = os.path.join(BASEPATH,
-                                 configurations['data']['csv_directory'])
-    cluster_csv_file = 'neuroscience_articles_1999-2023_cluster_descriptions_density.csv'
+                                 directories['internal']['reference']['pdfs'])
+    csv_directory = os.path.join(
+        BASEPATH, directories['internal']['intermediate']['csv'],
+        'Neuroscience')
+    cluster_csv_file = 'clusters_defined_distinguished.csv'
 
-    output_path = os.path.join(csv_directory, cluster_csv_file)
-    cluster_definitions_df = pd.read_csv(output_path)
-    interim_path = output_path.replace('.csv', '_interim.csv')
-    output_path = output_path.replace('.csv', '_questions.csv')
+    output_file = os.path.join(csv_directory, cluster_csv_file)
+    cluster_definitions_df = pd.read_csv(output_file)
+    checkpoint_file = os.path.join(checkpoint_path, 'questions_checkpoint.csv')
+    output_file = output_file.replace('.csv', '_questions.csv')
 
-    if os.path.exists(interim_path):
-        cluster_questions_df = pd.read_csv(interim_path)
+    if os.path.exists(checkpoint_file):
+        cluster_questions_df = pd.read_csv(checkpoint_file)
         cluster_questions = cluster_questions_df.to_dict('records')
         processed_clusters = set(
             cluster_questions_df['Cluster ID'].values.tolist())
@@ -222,18 +111,23 @@ if __name__ == '__main__':
 
         reviews = get_review_text(pdf_files)
 
+        chain_input = {
+            "cluster_title": cluster_title,
+            "cluster_definition": cluster_definition,
+            "reviews": reviews
+        }
         open_questions = safe_dictionary_extraction(
-            cluster_title, cluster_definition, reviews, questions_chain,
+            required_fields, chain_input, questions_chain,
             configurations['llm']['retries'], configurations['llm']['delay'])
 
         open_questions['Cluster ID'] = cluster
         cluster_questions.append(open_questions)
         cluster_questions_df = pd.DataFrame(cluster_questions)
-        cluster_questions_df.to_csv(interim_path, index=False)
+        cluster_questions_df.to_csv(checkpoint_file, index=False)
 
     # Add the open questions as a bew column to the cluster definitions
     cluster_definitions_df['Open Questions'] = cluster_questions_df[
         'Open Questions']
 
     # Save the cluster definitions to a CSV file
-    cluster_definitions_df.to_csv(output_path, index=False)
+    cluster_definitions_df.to_csv(output_file, index=False)
