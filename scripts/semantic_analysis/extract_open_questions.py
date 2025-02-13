@@ -17,13 +17,6 @@ load_dotenv(find_dotenv())
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 BASEPATH = os.environ['BASEPATH']
-""" 
-chain_input = {
-        "cluster_title": cluster_title,
-        "cluster_definition": cluster_definition,
-        "reviews": reviews
-    }
-"""
 
 # Deine prompt temlates
 QUESTIONS_PROMPT = PromptTemplate(
