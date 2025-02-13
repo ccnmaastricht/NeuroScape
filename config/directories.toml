@@ -5,6 +5,7 @@ raw = 'Internal/Raw/CSV'
 [internal.reference]
 reference = 'Internal/Reference'
 scimago = 'Internal/Reference/Scimago'
+pdfs = 'Internal/Reference/PDFs'
 
 [internal.manuscript]
 figures = 'Figures'
