@@ -6,7 +6,8 @@ required_fields = ['Keywords', 'Title', 'Description', 'Focus']
 max_abstract_number = 200
 required_fields = ['Distinguishing Features']
 
-
+[questions]
+required_fields = ['Open Questions']
 
 [dimensions]
 max_abstract_number = 250
