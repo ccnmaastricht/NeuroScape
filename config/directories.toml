@@ -8,8 +8,8 @@ scimago = 'Internal/Reference/Scimago'
 pdfs = 'Internal/Reference/PDFs'
 
 [internal.manuscript]
-figures = 'Figures'
-tables = 'Tables'
+figures = 'Internal/Manuscript/Figures'
+tables = 'Internal/Manuscript/Tables'
 
 [internal.intermediate]
 csv = 'Internal/Intermediate/CSV'
@@ -23,10 +23,6 @@ voyage = 'Internal/Intermediate/HDF5/VoyageAIEmbeddings'
 neuro = 'Internal/Intermediate/HDF5/DomainEmbeddings'
 
 [public]
-csv = 'Public/CSV'
-graphs = 'Public/Graphs'
-models = 'Public/Models'
-
-[public.embeddings]
-voyage = 'Public/Embeddings/Voyage_Lite_02_Instruct'
-neuro = 'Public/Embeddings/Custom_Neuro'
+csv = 'Public/Data/CSV'
+graphs = 'Public/Data/Graphs'
+hdf5 = 'Public/Data/HDF5/DomainEmbeddings'
