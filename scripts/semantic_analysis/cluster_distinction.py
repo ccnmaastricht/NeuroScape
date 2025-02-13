@@ -9,9 +9,9 @@ from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers.json import SimpleJsonOutputParser
 
 from src.utils.parsing import parse_directories
-from src.utils.semantic import load_configurations, safe_dictionary_extraction
 from src.utils.hypersphere import get_centroids
 from src.utils.load_and_save import load_embedding_shards, align_to_df
+from src.utils.semantic import load_configurations, safe_dictionary_extraction, get_abstract_strings
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -53,6 +53,9 @@ if __name__ == '__main__':
     required_fields = configurations['distinction']['required_fields']
     directories = parse_directories()
 
+    checkpoints_folder = os.path.join(BASEPATH,
+                                      directories['internal']['checkpoints'])
+
     llm = ChatOpenAI(temperature=configurations['llm']['temperature'],
                      model_name=configurations['llm']['model_name'])
     distinction_chain = DEFINITION_PROMPT | llm | SimpleJsonOutputParser()
@@ -68,12 +71,14 @@ if __name__ == '__main__':
     input_file = os.path.join(csv_directory, cluster_csv_file)
     cluster_definitions_df = pd.read_csv(input_file)
     output_file = input_file.replace('.csv', '_distinguished.csv')
+    checkpoint_file = os.path.join(checkpoints_folder,
+                                   'cluster_distinction_checkpoint.csv')
 
-    if os.path.exists(output_file):
-        cluster_distinctions_df = pd.read_csv(output_file)
+    if os.path.exists(checkpoint_file):
+        cluster_distinctions_df = pd.read_csv(checkpoint_file)
         cluster_distinctions = cluster_distinctions_df.to_dict('records')
         processed_clusters = set(
-            cluster_definitions_df['Cluster ID'].values.tolist())
+            cluster_distinctions_df['Cluster ID'].values.tolist())
     else:
         cluster_distinctions = []
         processed_clusters = set()
@@ -104,9 +109,6 @@ if __name__ == '__main__':
     # Get the abstracts
     abstracts = article_df['Abstract'].values
 
-    #
-    cluster_distinctions = []
-
     for label, centroid in enumerate(centroids):
 
         if label in processed_clusters:
@@ -124,12 +126,12 @@ if __name__ == '__main__':
         similar_cluster_centroid = centroids[similar_cluster_label]
 
         number_of_abstracts_cluster = min(
-            configurations['sampling']['distinction']['max_abstract_number'] //
-            2, len(cluster_abstracts))
+            configurations['distinction']['max_abstract_number'] // 2,
+            len(cluster_abstracts))
 
         number_of_abstracts_similar_cluster = min(
-            configurations['sampling']['distinction']['max_abstract_number'] //
-            2, len(similar_cluster_abstracts))
+            configurations['distinction']['max_abstract_number'] // 2,
+            len(similar_cluster_abstracts))
 
         cluster_abstracts = get_abstract_strings(similar_cluster_centroid,
                                                  cluster_embeddings,
@@ -149,17 +151,14 @@ if __name__ == '__main__':
             required_fields, chain_input, distinction_chain,
             configurations['llm']['retries'], configurations['llm']['delay'])
 
-        cluster_distinction['Distinguishing Features'].replace(
-            ', ',
-            '; ').replace('A', f'{label}').replace('B',
-                                                   f'{similar_cluster_label}')
+        cluster_distinction['Cluster ID'] = label
+        cluster_distinction['Distinguishing Features'] = cluster_distinction[
+            'Distinguishing Features'].replace(', ', '; ').replace(
+                'A', f'{label}').replace('B', f'{similar_cluster_label}')
         cluster_distinctions.append(cluster_distinction)
         cluster_distinctions_df = pd.DataFrame(cluster_distinctions)
-        cluster_distinctions_df.to_csv(output_file, index=False)
 
-        print(cluster_distinction)
-
-        break
+        cluster_distinctions_df.to_csv(checkpoint_file, index=False)
 
     # Add the cluster distinctions to the DataFrame as a new column
     cluster_definitions_df[
@@ -167,6 +166,5 @@ if __name__ == '__main__':
             'Distinguishing Features']
 
     # Save the cluster definitions to a CSV file
-    cluster_definitions_df.to_csv(os.path.join(csv_directory,
-                                               cluster_csv_file),
+    cluster_definitions_df.to_csv(os.path.join(csv_directory, output_file),
                                   index=False)
