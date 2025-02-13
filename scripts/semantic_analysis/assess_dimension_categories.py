@@ -9,6 +9,9 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers.json import SimpleJsonOutputParser
 
+from src.utils.parsing import parse_directories
+from src.utils.semantic import load_configurations
+
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
@@ -18,19 +21,6 @@ BASEPATH = os.environ['BASEPATH']
 
 
 # Define utility functions
-def load_configurations():
-    """
-    Load the configuration from the config file.
-    
-    Returns:
-    - configurations: dict
-    """
-    with open('config/analysis/cluster_dim_categorical.toml', 'rb') as f:
-        configurations = tomllib.load(f)
-
-    return configurations
-
-
 def process_dictionary(dictionary, required_keys):
     """
     Process the dictionary extracted from the LLM output.
@@ -185,20 +175,24 @@ DIMENSIONS_PROMPT = PromptTemplate(
 
 if __name__ == '__main__':
     configurations = load_configurations()
+    directories = parse_directories()
 
     llm = ChatOpenAI(temperature=configurations['llm']['temperature'],
                      model_name=configurations['llm']['model_name'])
     dimensions_chain = DIMENSIONS_PROMPT | llm | SimpleJsonOutputParser()
 
     # Load the CSV file
-    csv_directory = os.path.join(BASEPATH,
-                                 configurations['data']['csv_directory'])
-    cluster_csv_file = configurations['data']['input_file_name']
+    csv_directory = os.path.join(
+        BASEPATH, directories['internal']['intermediate']['csv'],
+        'Neuroscience')
+    checkpoint_path = os.path.join(BASEPATH,
+                                   directories['internal']['checkpoints'])
+    cluster_csv_file = 'clusters_defined_distinguished_questions_trends_assessed.csv'
     cluster_df = pd.read_csv(os.path.join(csv_directory, cluster_csv_file))
     narrative_dimension_df = cluster_df[["Cluster ID", "Dimensions"]]
 
     # Define the output path
-    dimension_csv_file = configurations['data']['output_file_name']
+    dimension_csv_file = 'dimensions.csv'
     dimension_categories = {
         'Appliedness': [
             'Fundamental', 'Translational', 'Clinical', 'Method Development',
@@ -239,7 +233,7 @@ if __name__ == '__main__':
                        categories) in enumerate(dimension_categories.items(),
                                                 start=1):
 
-        dimension_df = get_dimension_df(csv_directory, dimension_id,
+        dimension_df = get_dimension_df(checkpoint_path, dimension_id,
                                         narrative_dimension_df, dimension,
                                         categories, dimensions_chain,
                                         configurations['llm']['retries'],
@@ -254,6 +248,9 @@ if __name__ == '__main__':
             dim_cat_df = pd.DataFrame(data)
         else:
             dim_cat_df = pd.concat([dim_cat_df, pd.DataFrame(data)], axis=1)
+
+    # Add Cluster ID to the DataFrame
+    dim_cat_df['Cluster ID'] = narrative_dimension_df['Cluster ID']
 
     # Save the cluster definitions to a CSV file
     dim_cat_df.to_csv(os.path.join(csv_directory, dimension_csv_file),
