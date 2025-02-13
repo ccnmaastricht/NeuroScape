@@ -12,7 +12,7 @@ from langchain_core.output_parsers.json import SimpleJsonOutputParser
 
 from src.utils.parsing import parse_directories
 from src.utils.hypersphere import get_centroids
-from src.utils.semantic import load_configurations, safe_dictionary_extraction, validate_dictionary
+from src.utils.semantic import load_configurations, safe_dictionary_extraction, get_abstract_strings
 from src.utils.load_and_save import load_embedding_shards, align_to_df
 
 from dotenv import load_dotenv, find_dotenv
@@ -73,6 +73,7 @@ DIMENSIONS_PROMPT = PromptTemplate(
 
 if __name__ == '__main__':
     configurations = load_configurations()
+    required_fields = configurations['dimensions']['required_fields']
     directories = parse_directories()
 
     llm = ChatOpenAI(temperature=configurations['llm']['temperature'],
@@ -88,13 +89,13 @@ if __name__ == '__main__':
     article_df = article_df[article_df['Type'] == 'Research']
 
     # Define the output path
-    cluster_csv_file = 'clusters_defined_distinguished.csv'
+    cluster_csv_file = 'clusters_defined_distinguished_questions_trends.csv'
     cluster_df = pd.read_csv(os.path.join(csv_directory, cluster_csv_file))
     output_file = os.path.join(
         csv_directory, cluster_csv_file.replace('.csv', '_assessed.csv'))
     checkpoints_file = os.path.join(BASEPATH,
                                     directories['internal']['checkpoints'],
-                                    'dimension_assessment.csv')
+                                    'assessment_checkpoint.csv')
 
     if os.path.exists(checkpoints_file):
         cluster_dimensions_df = pd.read_csv(checkpoints_file)
@@ -142,7 +143,7 @@ if __name__ == '__main__':
         cluster_abstracts = abstracts[labels == label]
 
         number_of_abstracts = min(
-            configurations['sampling']['max_abstract_number'],
+            configurations['dimensions']['max_abstract_number'],
             len(cluster_abstracts))
 
         similarity = centroid.dot(cluster_embeddings.T)
