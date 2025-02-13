@@ -10,95 +10,23 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers.json import SimpleJsonOutputParser
 
+from src.utils.parsing import parse_directories
+from src.utils.semantic import load_configurations, safe_dictionary_extraction
+
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 BASEPATH = os.environ['BASEPATH']
-
-
-# Define utility functions
-def load_configurations():
-    """
-    Load the configuration from the config file.
-    
-    Returns:
-    - configurations: dict
-    """
-    with open('config/analysis/cluster_definition.toml', 'rb') as f:
-        configurations = tomllib.load(f)
-
-    return configurations
-
-
-def process_dictionary(dictionary):
-    """
-    Process the dictionary extracted from the LLM output.
-
-    Parameters:
-    - dictionary: dict, the LLM output dictionary.
-
-    Returns:
-    - new_dict: dict, the extracted dictionary.
-    """
-
-    try:
-        # Verify that the required fields are present
-        if not all(key in dictionary for key in [
-                'Emerging Themes', 'Emerging Methodological Approaches',
-                'Declining Themes', 'Declining Methodological Approaches',
-                'Nature Research'
-        ]):
-            raise ValueError("Missing required fields in the LLM output")
-
-        # Join the keys as a single string with each key as a title and a line break between them
-        new_dict = {
-            'Trends':
-            '\n'.join([f'{key}: {value}' for key, value in dictionary.items()])
-        }
-
-        return new_dict
-
-    except Exception:
-        return None
-
-
-def safe_dictionary_extraction(cluster_title, year, old_abstracts,
-                               recent_abstracts, chain, retries, delay):
-    """
-    Safely extract the dictionary from the LLM output.
-
-    Parameters:
-    - cluster_title: String, the cluster
-    - year: int, the year to compare.
-    - old_abstracts: String, the old abstracts.
-    - recent_abstracts: String, the recent abstracts.
-    - chain: LLMChain, the LLM chain to invoke.
-    - retries: int, the number of retries allowed.
-    - delay: int, the delay between retries.
-
-    Returns:
-    - dictionary: dict, the extracted dictionary.
-    """
-    chain_input = {
+""" 
+chain_input = {
         "title": cluster_title,
         "year": year,
         "old_abstracts": old_abstracts,
         "recent_abstracts": recent_abstracts
     }
-    attempt = 0
-    while attempt < retries:
-        dictionary = chain.invoke(chain_input)
-        cluster_trends = process_dictionary(dictionary)
-        time.sleep(delay)
-        if cluster_trends:
-            return cluster_trends
-        else:
-            attempt += 1
-
-    return None
-
+"""
 
 # Deine prompt temlates
 TRENDS_PROMPT = PromptTemplate(
@@ -141,32 +69,35 @@ TRENDS_PROMPT = PromptTemplate(
 
 if __name__ == '__main__':
     configurations = load_configurations()
-    num_abstracts_per_set = configurations['sampling'][
-        'max_abstract_number'] // 2
+    directories = parse_directories()
 
-    recent_cutoff = configurations['sampling']['recent_cutoff']
-    older_cutoff = configurations['sampling']['older_cutoff']
+    num_abstracts_per_set = configurations['trends']['max_abstract_number'] // 2
+    required_fields = configurations['trends']['required_fields']
+    recent_cutoff = configurations['trends']['recent_cutoff']
+    older_cutoff = configurations['trends']['older_cutoff']
 
     llm = ChatOpenAI(temperature=configurations['llm']['temperature'],
                      model_name=configurations['llm']['model_name'])
     trends_chain = TRENDS_PROMPT | llm | SimpleJsonOutputParser()
 
     # Load the CSV file
-    csv_directory = os.path.join(BASEPATH,
-                                 configurations['data']['csv_directory'])
-    article_csv_file = configurations['data']['input_file_name']
+    csv_directory = os.path.join(
+        BASEPATH, directories['internal']['intermediate']['csv'],
+        'Neuroscience')
+    article_csv_file = 'articles_merged_cleaned_filtered_clustered.csv'
     article_df = pd.read_csv(os.path.join(csv_directory, article_csv_file))
-    article_df = article_df[article_df['Type'] == 'Research']
 
     # Define the output path
-    cluster_csv_file = configurations['data']['output_file_name']
-    cluster_df = pd.read_csv(os.path.join(csv_directory, cluster_csv_file))
-    output_path = os.path.join(csv_directory, cluster_csv_file)
-    interim_path = output_path.replace('.csv', '_interim.csv')
-    output_path = output_path.replace('.csv', '_trends.csv')
+    cluster_csv_file = 'clusters_defined_distinguished_questions.csv'
+    output_file = os.path.join(csv_directory, cluster_csv_file)
+    cluster_df = pd.read_csv(output_file)
+    output_file = output_file.replace('.csv', '_trends.csv')
+    checkpoint_path = os.path.join(BASEPATH,
+                                   directories['internal']['checkpoints'])
+    checkpoint_file = os.path.join(checkpoint_path, 'trends_checkpoint.csv')
 
-    if os.path.exists(interim_path):
-        cluster_trends_df = pd.read_csv(interim_path)
+    if os.path.exists(checkpoint_file):
+        cluster_trends_df = pd.read_csv(checkpoint_file)
         cluster_trends = cluster_trends_df.to_dict('records')
         processed_clusters = set(
             cluster_trends_df['Cluster ID'].values.tolist())
@@ -180,7 +111,7 @@ if __name__ == '__main__':
     research_articles = article_df[article_df['Type'] == 'Research']
 
     # Get cluster labels
-    labels = research_articles['Cluster'].values
+    labels = research_articles['Cluster ID'].values
 
     for label in tqdm(np.unique(labels)):
 
@@ -188,7 +119,7 @@ if __name__ == '__main__':
             continue
 
         older_abstracts = research_articles[
-            (research_articles['Cluster'] == label)
+            (research_articles['Cluster ID'] == label)
             & (research_articles['Year'] >= older_cutoff) &
             (research_articles['Year'] < recent_cutoff)]['Abstract'].values
         number_of_abstracts = min(num_abstracts_per_set, len(older_abstracts))
@@ -198,8 +129,9 @@ if __name__ == '__main__':
         older_abstracts = '\n\n'.join(older_abstracts[random_indices])
 
         recent_df = research_articles[
-            (research_articles['Cluster'] == label)
+            (research_articles['Cluster ID'] == label)
             & (research_articles['Year'] >= recent_cutoff)]
+
         # sort by citation rate
         recent_df = recent_df.sort_values('Citation Rate', ascending=False)
         recent_abstracts = recent_df['Abstract'].values[:num_abstracts_per_set]
@@ -209,17 +141,32 @@ if __name__ == '__main__':
 
         cluster_title = cluster_df.loc[label, 'Title']
 
+        chain_input = {
+            "title": cluster_title,
+            "year": recent_cutoff,
+            "old_abstracts": older_abstracts,
+            "recent_abstracts": recent_abstracts
+        }
+
         cluster_trends_dict = safe_dictionary_extraction(
-            cluster_title, recent_cutoff, older_abstracts, recent_abstracts,
-            trends_chain, configurations['llm']['retries'],
-            configurations['llm']['delay'])
+            required_fields, chain_input, trends_chain,
+            configurations['llm']['retries'], configurations['llm']['delay'])
+
+        # Join the keys as a single string with each key as a title and a line break between them
+        cluster_trends_dict = {
+            'Trends':
+            '\n'.join([
+                f'{key}: {value}'
+                for key, value in cluster_trends_dict.items()
+            ])
+        }
 
         cluster_trends_dict['Cluster ID'] = label
         cluster_trends.append(cluster_trends_dict)
         processed_clusters.add(label)
 
         cluster_trends_df = pd.DataFrame(cluster_trends)
-        cluster_trends_df.to_csv(interim_path, index=False)
+        cluster_trends_df.to_csv(checkpoint_file, index=False)
 
     # Convert the cluster definitions to a DataFrame
     cluster_trends_df = pd.DataFrame(cluster_trends)
@@ -228,4 +175,4 @@ if __name__ == '__main__':
     cluster_trends_df = cluster_df.merge(cluster_trends_df, on='Cluster ID')
 
     # Save the cluster definitions to a CSV file
-    cluster_trends_df.to_csv(output_path, index=False)
+    cluster_trends_df.to_csv(output_file, index=False)

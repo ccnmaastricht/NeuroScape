@@ -9,6 +9,17 @@ required_fields = ['Distinguishing Features']
 [questions]
 required_fields = ['Open Questions']
 
+[trends]
+max_abstract_number = 200
+older_cutoff = 2010
+recent_cutoff = 2021
+required_fields = [
+                 'Emerging Themes',
+                 'Emerging Methodological Approaches',
+                 'Declining Themes',
+                 'Declining Methodological Approaches'
+                 ]
+
 [dimensions]
 max_abstract_number = 250
 older_cutoff = 2010
