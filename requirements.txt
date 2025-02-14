@@ -11,7 +11,7 @@ leidenalg==0.10.2
 numpy==2.2.3
 openai==1.63.0
 pandas==2.2.3
-pdfminer==20191125
+pdfminer.six==20240706
 psutil==6.0.0
 python-dotenv==1.0.1
 python_igraph==0.11.6
