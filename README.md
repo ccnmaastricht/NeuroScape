@@ -29,77 +29,77 @@ Neuroscience emerged as a distinct academic discipline during the 20th century a
 
 ## Workflow Overview
 
-1. **Scrape Data**  
+1. **Scrape Data**
    - *scripts/ingestion/scraping.py*  
    - Query PubMed for relevant neuroscience articles.
 
-2. **Merge and Clean**  
+3. **Merge and Clean**  
    - *scripts/ingestion/merge_and_clean.py*  
    - Consolidate scraped data, remove duplicates, and clean metadata.
 
-3. **Initial Embedding**  
+4. **Initial Embedding**  
    - *scripts/ingestion/initial_embedding.py*  
    - Generate general-purpose text embeddings (via Voyage AI) for each abstract.
 
-4. **Prepare Classifier Training Data**  
+5. **Prepare Classifier Training Data**  
    - *scripts/preprocessing/prepare_classifier_training_data.py*  
    - Create labeled samples for discipline classification (to distinguish neuroscience from other fields).
 
-5. **Train Discipline Classifier**  
+6. **Train Discipline Classifier**  
    - *scripts/preprocessing/train_discipline_classifier.py*  
    - Train a neural network to identify neuroscience-related articles.
 
-6. **Filter Data**  
+7. **Filter Data**  
    - *scripts/preprocessing/filter_disciplines.py*  
    - Retain only articles classified as neuroscience with high confidence.
 
-7. **Build Adjacency Matrix**  
+8. **Build Adjacency Matrix**  
    - *scripts/ingestion/build_adjacencies.py*  
    - Construct citation or similarity networks among the retained articles.
 
-8. **Train Domain Embedding Model**
+9. **Train Domain Embedding Model**
     - *scripts/domain_embedding/train_embedding_model.py*
     - Trains a domain-specific embedding model on top of the initial embeddings (contrastive learning)
 
-9. **Domain Embedding**
+10. **Domain Embedding**
     - *scripts/domain_embedding/embed_abstracts.py*
     - Re-embeds abstracts in a lower-dimensional, neuroscience-focused space for semantic clustering.
 
-10. **Build the Semantic Graph**
+11. **Build the Semantic Graph**
     - *scripts/clustering/graph_construction.py*
     - Uses the domain-specific embeddings to construct a similarity graph (e.g., KNN) needed for community detection.
 
-11. **Community Detection**  
-   - *scripts/clustering/community_detection.py*  
-   - Perform clustering (e.g., Leiden community detection) on the network.
+12. **Community Detection**  
+    - *scripts/clustering/community_detection.py*  
+    - Perform clustering (e.g., Leiden community detection) on the network.
 
 12. **Cluster Definition**  
-   - *scripts/semantic_analysis/cluster_definition.py*  
-   - Generate descriptive titles, keywords, and summaries for each cluster.
+    - *scripts/semantic_analysis/cluster_definition.py*  
+    - Generate descriptive titles, keywords, and summaries for each cluster.
 
 13. **Cluster Distinction**  
-   - *scripts/semantic_analysis/cluster_distinction.py*  
-   - Identify key differences between similar clusters.
+    - *scripts/semantic_analysis/cluster_distinction.py*  
+    - Identify key differences between similar clusters.
 
 14. **Dimensions Extraction**  
-   - *scripts/semantic_analysis/assess_dimensions.py*  
-   - Analyze each cluster across multiple research dimensions (e.g., appliedness, modality).
+    - *scripts/semantic_analysis/assess_dimensions.py*  
+    - Analyze each cluster across multiple research dimensions (e.g., appliedness, modality).
 
 15. **Dimension Categorization**  
-   - *scripts/semantic_analysis/assess_dimension_categories.py*  
-   - Categorize clusters along specific sub-dimensions (e.g., spatial vs. temporal scales).
+    - *scripts/semantic_analysis/assess_dimension_categories.py*  
+    - Categorize clusters along specific sub-dimensions (e.g., spatial vs. temporal scales).
 
 16. **Open Questions**  
-   - *scripts/semantic_analysis/extract_open_questions.py*  
-   - Identify important open research questions from recent review articles.
+    - *scripts/semantic_analysis/extract_open_questions.py*  
+    - Identify important open research questions from recent review articles.
 
 17. **Trends Extraction**  
-   - *scripts/semantic_analysis/extract_trends.py*  
-   - Compare older vs. recent publications to reveal emerging and declining trends.
+    - *scripts/semantic_analysis/extract_trends.py*  
+    - Compare older vs. recent publications to reveal emerging and declining trends.
 
 18. **Density Graph**  
-   - *scripts/graph_analysis/cluster_density.py*  
-   - Assess citation density and connections between clusters.
+    - *scripts/graph_analysis/cluster_density.py*  
+    - Assess citation density and connections between clusters.
 
-**Optional**  
+**Optional** 
 - *scripts/preprocessing/update_embedding.py* allows updating the general embeddings with a newer Voyage AI model if desired.
