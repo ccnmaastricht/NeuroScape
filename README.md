@@ -110,6 +110,27 @@ Senden, M. (2025). NeuroScape (1.0.1) [Data set]. Zenodo. [https://doi.org/10.52
 **Optional** 
 - *scripts/preprocessing/update_embedding.py* allows updating the general embeddings with a newer Voyage AI model if desired.
 
+
+## **Setup Instructions**
+
+### **1. Create a Conda Environment**
+First, create and activate a Conda environment with Python 3.12:
+```bash
+conda create --name neuroscape_env python==3.12
+conda activate neuroscape_env
+```
+
+### **2. Install PyTorch**
+Install PyTorch **before** installing other dependencies. Follow the official instructions based on your system:
+- **Visit**: [PyTorch Installation Guide](https://pytorch.org/get-started/locally/)
+
+
+### **3. Install Other Dependencies**
+Once PyTorch is installed, install the remaining dependencies from `requirements.txt`:
+```bash
+pip install -r requirements.txt
+```
+
 ## Disclaimer
 
 This repository provides the scripts and workflow used in *The Evolving Landscape of Neuroscience* study and is intended for research and educational purposes. While I encourage other researchers to use and build upon this work, **I am primarily a researcher, not a full-time software developer**. As such:
