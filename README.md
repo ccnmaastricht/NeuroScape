@@ -27,6 +27,11 @@ Neuroscience emerged as a distinct academic discipline during the 20th century a
 └── README.md
 ```
 
+## Data
+
+This repository has been used to collect, curate, and analyze the following dataset:
+Senden, M. (2025). NeuroScape (1.0.1) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.14865161
+
 ## Workflow Overview
 
 1. **Scrape Data**
