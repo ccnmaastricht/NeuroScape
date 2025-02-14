@@ -103,3 +103,13 @@ Neuroscience emerged as a distinct academic discipline during the 20th century a
 
 **Optional** 
 - *scripts/preprocessing/update_embedding.py* allows updating the general embeddings with a newer Voyage AI model if desired.
+
+## Disclaimer
+
+This repository provides the scripts and workflow used in *The Evolving Landscape of Neuroscience* study and is intended for research and educational purposes. While I encourage other researchers to use and build upon this work, **I am primarily a researcher, not a full-time software developer**. As such:
+
+- I **welcome issues and pull requests** and will try to address them as time permits.
+- However, **active maintenance is not guaranteed**. Users should **not** expect frequent updates or extensive support.
+- The code is provided **as is**, without warranties regarding performance, correctness, or long-term compatibility.
+
+If you use this repository for your research, I would appreciate a citation to the accompanying manuscript.
