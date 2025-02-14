@@ -16,3 +16,5 @@ ipython_config.py
 
 # Environments
 .env
+
+*ignore*
