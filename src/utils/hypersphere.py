@@ -68,6 +68,7 @@ def get_centroids(x, labels):
 
     Parameters:
     x (np.ndarray): The input data.
+    labels (np.ndarray): The labels of the input data.
 
     Returns:
     centroids (np.ndarray): The centroids of the input data.
