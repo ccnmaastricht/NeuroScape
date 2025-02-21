@@ -2,7 +2,7 @@
 
 Codebase accompanying the article:
 
-Senden, M. (n.d.). The Evolving Landscape of Neuroscience. *Manuscript submitted*.
+Senden, M. (2025). The Evolving Landscape of Neuroscience [Preprint]. bioRxiv. [https://doi.org/10.1101/2025.02.13.638094](https://doi.org/10.1101/2025.02.13.638094)
 
 This repository contains scripts and notebooks for analyzing and visualizing neuroscience research through large-scale data collection, filtering, clustering, and semantic analysis of scientific articles.
 
