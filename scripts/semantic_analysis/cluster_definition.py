@@ -27,11 +27,11 @@ DEFINITION_PROMPT = PromptTemplate(
     template="""
             You are provided with a list of scientific abstracts that belong to a specific research cluster. Your task is to:
 
-1. **Identify the most frequent and relevant keywords and phrases** used in the abstracts within this cluster. The keywords should accurately characterize the research within the cluster and avoid wrong assertions.
+1. **Identify the most frequent and relevant keywords and phrases** used in the abstracts within this cluster. The keywords should accurately characterize the research within the cluster and avoid wrong assertions. Not a single abstract should be misrepresented.
 
-2. **Provide a descriptive title** for the cluster that encapsulates the main themes and methodologies.
+2. **Provide a descriptive title** for the cluster that encapsulates the main themes and methodologies. The title should be concise and accurately reflect the content of the abstracts. Not a single abstract should be misrepresented.
 
-3. **Write a brief summary** (1-2 sentences) that describes the main themes and methodologies of the cluster.
+3. **Write a brief summary** (1-2 sentences) that describes the main themes and methodologies of the cluster. The summary should be clear and accurately reflect the content of the abstracts. Not a single abstract should be misrepresented. 
 
 4. **Determine the main focus** of the cluster, whether it is on the themes or methodologies. A methodological focus is when a cluster focuses on method development or consistently applies a specific methodology. A thematic focus is when a cluster consistently studies a specific phenomenon.
 
@@ -49,7 +49,7 @@ Please present your findings in **JSON format** with the following structure:
 
 - **Accuracy is crucial**: Ensure all information is directly supported by the provided abstracts. Do not include information not present in the abstracts or make external assumptions.
 
-- **Clarity and Precision**: The keywords, title, and description should be clear and accurately reflect the content of the abstracts.
+- **Clarity and Precision**: The keywords, title, and description should be clear and accurately reflect the content of the abstracts. Not a single abstract should be misrepresented.
 
 - **Conciseness**: Do not include any additional text or explanations beyond the specified JSON output. Do not generate more output than necessary.
 
