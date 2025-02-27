@@ -61,11 +61,11 @@ Senden, M. (2025). NeuroScape (1.0.1) [Data set]. Zenodo. [https://doi.org/10.52
 
 8. **Build Adjacency Matrix**  
    - *scripts/ingestion/build_adjacencies.py*  
-   - Construct citation or similarity networks among the retained articles.
+   - Obtains citing and cited articles for each article in the dataset.
 
 9. **Train Domain Embedding Model**
     - *scripts/domain_embedding/train_embedding_model.py*
-    - Trains a domain-specific embedding model on top of the initial embeddings (contrastive learning)
+    - Trains a domain-specific embedding model on top of the initial embeddings (through contrastive learning).
 
 10. **Domain Embedding**
     - *scripts/domain_embedding/embed_abstracts.py*
