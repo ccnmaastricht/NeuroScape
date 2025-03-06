@@ -37,7 +37,7 @@ Senden, M. (2025). NeuroScape (1.0.1) [Data set]. Zenodo. [https://doi.org/10.52
 
 1. **Scrape Data**
    - *scripts/ingestion/scraping.py*  
-   - Query PubMed for relevant neuroscience articles.
+   - Query PubMed for relevant articles. Neuroscience, multidisciplinary and other (for training discipline classifier).
 
 3. **Merge and Clean**  
    - *scripts/ingestion/merge_and_clean.py*  
@@ -53,7 +53,7 @@ Senden, M. (2025). NeuroScape (1.0.1) [Data set]. Zenodo. [https://doi.org/10.52
 
 6. **Train Discipline Classifier**  
    - *scripts/preprocessing/train_discipline_classifier.py*  
-   - Train a neural network to identify neuroscience-related articles.
+   - Train a neural network to identify neuroscientific articles.
 
 7. **Filter Data**  
    - *scripts/preprocessing/filter_disciplines.py*  
@@ -81,7 +81,7 @@ Senden, M. (2025). NeuroScape (1.0.1) [Data set]. Zenodo. [https://doi.org/10.52
 
 12. **Cluster Definition**  
     - *scripts/semantic_analysis/cluster_definition.py*  
-    - Generate descriptive titles, keywords, and summaries for each cluster.
+    - Generate descriptive titles, keywords, and descriptions for each cluster.
 
 13. **Cluster Distinction**  
     - *scripts/semantic_analysis/cluster_distinction.py*  
@@ -93,7 +93,7 @@ Senden, M. (2025). NeuroScape (1.0.1) [Data set]. Zenodo. [https://doi.org/10.52
 
 15. **Dimension Categorization**  
     - *scripts/semantic_analysis/assess_dimension_categories.py*  
-    - Categorize clusters along specific sub-dimensions (e.g., spatial vs. temporal scales).
+    - Categorize clusters along specific sub-dimensions (e.g., fundamental vs clinical research within appliedness).
 
 16. **Open Questions**  
     - *scripts/semantic_analysis/extract_open_questions.py*  
@@ -110,6 +110,9 @@ Senden, M. (2025). NeuroScape (1.0.1) [Data set]. Zenodo. [https://doi.org/10.52
 **Optional** 
 - *scripts/preprocessing/update_embedding.py* allows updating the general embeddings with a newer Voyage AI model if desired.
 
+## Notebooks
+
+Notebooks handle creation of Figures and Tables for the manuscript, including additional analyses.
 
 ## **Setup Instructions**
 
