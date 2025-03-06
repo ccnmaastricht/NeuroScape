@@ -111,9 +111,11 @@ if __name__ == '__main__':
     filtered_data = []
 
     multi_dataframe = pd.read_csv(
-        os.path.join(multidisciplinary_dataframe_dir, 'merged.csv'))
+        os.path.join(multidisciplinary_dataframe_dir,
+                     'articles_merged_cleaned.csv'))
     neuro_dataframe = pd.read_csv(
-        os.path.join(neuroscience_dataframe_dir, 'merged.csv'))
+        os.path.join(neuroscience_dataframe_dir,
+                     'articles_merged_cleaned.csv'))
 
     multi_embedding_files = glob.glob(
         os.path.join(multidisciplinary_embedding_dir, '*.pkl'))
