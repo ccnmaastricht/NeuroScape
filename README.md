@@ -2,12 +2,14 @@
 
 Codebase accompanying the article:
 
-Senden, M. (2025). The Evolving Landscape of Neuroscience [Preprint]. bioRxiv. [https://doi.org/10.1101/2025.02.13.638094](https://doi.org/10.1101/2025.02.13.638094)
+Senden, M. (n.d.). AI-Driven Analysis of 461,316 Articles (1999-2023) Reveals Neuroscience’s Shifting Research Landscape. *Manuscript submitted*.
+
+[BioRxiv preprint](https://doi.org/10.1101/2025.02.13.638094)
 
 This repository contains scripts and notebooks for analyzing and visualizing neuroscience research through large-scale data collection, filtering, clustering, and semantic analysis of scientific articles.
 
 ## Abstract
-Neuroscience emerged as a distinct academic discipline during the 20th century and has undergone rapid expansion and diversification. A comprehensive analysis of its evolving landscape becomes increasingly important to retain an overview of cross-domain insights and research questions. This study leverages text-embedding and clustering techniques together with large language models to analyze 461,316 articles published between 1999 and 2023 and reveals the field's structural organization and dominant research domains. Inter-cluster citation analysis uncovers a surprisingly integrated picture and key intellectual hubs that shape the broader research landscape. An analysis of how research clusters align with pre-defined dimensions demonstrates a strong experimental focus, widespread reliance on specific mechanistic explanations rather than unifying theoretical frameworks, and a growing emphasis on applied research. Fundamental research is at the risk of decline and cross-scale integration remains limited. This study provides a framework for understanding neuroscience's trajectory and identifies potential avenues for strengthening the field.
+Neuroscience emerged as a distinct academic discipline during the 20th century and has undergone rapid expansion since then. To retain an overview of the structural organization of contemporary neuroscience, this study leverages text-embedding and clustering techniques together with large language models for analyzing 461,316 articles published between 1999 and 2023. The field exhibits a strong experimental focus and a growing emphasis on applied research while fundamental research is at the risk of decline. Furthermore, neuroscience currently lacks theory-centric clusters. Inter-cluster citation analysis uncovers a surprisingly high level of cross-fertilization and key intellectual hubs that shape the broader landscape. Yet, cross-scale integration remains limited. This study provides a framework for understanding neuroscience’s trajectory and identifies potential avenues for strengthening the field. Publicly available data and code provide a reusable resource for researchers, funders, and policy analysts.
 
 ## Repository Structure
 ```
@@ -136,7 +138,7 @@ pip install -r requirements.txt
 
 ## Disclaimer
 
-This repository provides the scripts and workflow used in *The Evolving Landscape of Neuroscience* study and is intended for research and educational purposes. While I encourage other researchers to use and build upon this work, **I am primarily a researcher, not a full-time software developer**. As such:
+This repository provides the scripts and workflow used in the study and is intended for research and educational purposes. While I encourage other researchers to use and build upon this work, **I am primarily a researcher, not a full-time software developer**. As such:
 
 - I **welcome issues and pull requests** and will try to address them as time permits.
 - However, **active maintenance is not guaranteed**. Users should **not** expect frequent updates or extensive support.
