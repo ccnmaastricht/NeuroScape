@@ -10,7 +10,7 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers.json import SimpleJsonOutputParser
 
-from src.utils.parsing import parse_directories
+from src.utils.parsing import parse_directories, parse_start_year, parse_end_year
 from src.utils.hypersphere import get_centroids
 from src.utils.semantic import load_configurations, safe_dictionary_extraction, get_abstract_strings
 from src.utils.load_and_save import load_embedding_shards, align_to_df
@@ -21,6 +21,7 @@ load_dotenv(find_dotenv())
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 BASEPATH = os.environ['BASEPATH']
+BASEPATH = '/media/mario/HDD/Data/NeuroScape_copy'
 
 # Deine prompt temlates
 DIMENSIONS_PROMPT = PromptTemplate(
@@ -31,7 +32,7 @@ DIMENSIONS_PROMPT = PromptTemplate(
             
             Your task is to identify **key neuroscience dimensions** that best describe the cluster, guided by the following 9 dimensions:
 
-            1. Appliedness: The extent to which the research is basic science (fundamental mechanisms) or applied (translational, clinical, method development, advancing technology).
+            1. Appliedness: The extent to which the research is basic science (fundamental mechanisms) or applied (translational, clinical, legal, neuroeconomics, method development, advancing technology).
             2. Modality: The sensory and/or motor modality under investigation (e.g., visual, auditory, gustatory, somatosensory, motor, sensorimotor, multimodal).
             3. Spatiotemporal Scale: The spatial (e.g., molecular, cellular, circuit, region, systems, whole-brain) and temporal (e.g., microsecond, millisecond, second, minute, hour, day, week, month, year, lifetime) scale of the research.
             4. Cognitive Complexity: The level of cognitive complexity under investigation from low level (e.g., sensory processing, motor control) to high level (e.g., language, decision making, social cognition).
@@ -67,6 +68,8 @@ DIMENSIONS_PROMPT = PromptTemplate(
 
             - **Conciseness**: Do not include any additional text or explanations beyond the specified JSON output. Do not generate more output than necessary.
 
+            - **Compliance**: Return the JSON file even when you did not receive any abstracts. Just say not applicable for all dimensions.
+
             **Here are the abstracts:**
             {abstracts}""",
 )
@@ -75,6 +78,8 @@ if __name__ == '__main__':
     configurations = load_configurations()
     required_fields = configurations['dimensions']['required_fields']
     directories = parse_directories()
+    start_year = parse_start_year()
+    end_year = parse_end_year()
 
     llm = ChatOpenAI(temperature=configurations['llm']['temperature'],
                      model_name=configurations['llm']['model_name'])
@@ -86,7 +91,9 @@ if __name__ == '__main__':
         'Neuroscience')
     article_csv_file = 'articles_merged_cleaned_filtered_clustered.csv'
     article_df = pd.read_csv(os.path.join(csv_directory, article_csv_file))
-    article_df = article_df[article_df['Type'] == 'Research']
+    article_df = article_df[(article_df['Type'] == 'Research')
+                            & (article_df['Year'] >= start_year) &
+                            (article_df['Year'] <= end_year)]
 
     # Define the output path
     cluster_csv_file = 'clusters_defined_distinguished_questions_trends.csv'
@@ -102,6 +109,7 @@ if __name__ == '__main__':
         cluster_dimensions = cluster_dimensions_df.to_dict('records')
         processed_clusters = set(
             cluster_dimensions_df['Cluster ID'].values.tolist())
+        print(processed_clusters)
 
         print(f'{len(processed_clusters)} clusters have been processed.')
     else:
@@ -172,9 +180,6 @@ if __name__ == '__main__':
 
         cluster_dimensions_df = pd.DataFrame(cluster_dimensions)
         cluster_dimensions_df.to_csv(checkpoints_file, index=False)
-
-        print(cluster_dimensions)
-        break
 
     # Convert the cluster definitions to a DataFrame
     cluster_dimensions_df = pd.DataFrame(cluster_dimensions)
