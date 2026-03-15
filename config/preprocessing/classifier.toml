@@ -29,5 +29,5 @@ confidence_cutoff = 0
 
 [filtering]
 confidence_cutoff = 0.8
-class_index = 19   # 13 (old version of code - commensurate with NeuroScape data)
+class_index = 13   # 13 (old version of code - commensurate with NeuroScape data)
 shard_size = 200

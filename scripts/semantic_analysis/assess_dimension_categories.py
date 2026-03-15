@@ -195,8 +195,8 @@ if __name__ == '__main__':
     dimension_csv_file = 'dimensions.csv'
     dimension_categories = {
         'Appliedness': [
-            'Fundamental', 'Translational', 'Clinical', 'Method Development',
-            'Technological Exploitation'
+            'Fundamental', 'Translational', 'Clinical', 'Legal', 'Economic',
+            'Method Development', 'Technological Exploitation'
         ],
         'Modality': [
             'Auditory', 'Visual', 'Olfactory', 'Gustatory', 'Somatosensory',
