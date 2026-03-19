@@ -4,7 +4,7 @@ item_threshold = 200
 [model]
 device = "cuda"
 layer_sizes = [1024, 256, 64]
-num_classes = 26
+num_classes = 23
 
 [pretraining]
 epochs = 25

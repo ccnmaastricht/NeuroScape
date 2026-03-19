@@ -1,18 +1,18 @@
 [definition]
-max_abstract_number = 200
+max_abstract_number = 1
 required_fields = ['Keywords', 'Title', 'Description', 'Focus']
 
 [distinction]
-max_abstract_number = 200
+max_abstract_number = 2
 required_fields = ['Distinguishing Features']
 
 [questions]
 required_fields = ['Open Questions']
 
 [trends]
-max_abstract_number = 200
+max_abstract_number = 2
 older_cutoff = 2010
-recent_cutoff = 2021
+recent_cutoff = 2023
 required_fields = [
                  'Emerging Themes',
                  'Emerging Methodological Approaches',
@@ -21,9 +21,9 @@ required_fields = [
                  ]
 
 [dimensions]
-max_abstract_number = 250
+max_abstract_number = 2
 older_cutoff = 2010
-recent_cutoff = 2021
+recent_cutoff = 2023
 required_fields = [
                 'Dimension 1 - Appliedness', 'Dimension 2 - Modality',
                 'Dimension 3 - Spatiotemporal Scale',
@@ -35,8 +35,8 @@ required_fields = [
         ]
 
 [llm]
-temperature = 1.0
-model_name = 'gpt-4o-2024-08-06'
-delay = 0.2
-retries = 10
+temperature = 0.0
+model_name = 'orca-mini:13b'
+delay = 2.0
+retries = 2
 

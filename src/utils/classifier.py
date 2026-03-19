@@ -296,20 +296,13 @@ def to_device(X, Y, device):
 
 
 def drop_class(model, X, Y, device, confidence_cutoff):
-    """
-    Drop the classes below the confidence_cutoff.
-
-    Parameters:
-    - model: PyTorch model
-    - X: Numpy array of shape [num_samples, num_features] containing the input features.
-    - Y: Numpy array of shape [num_samples, num_classes] containing the class labels.
-    - device: PyTorch device.
-    - confidence_cutoff: Float, the confidence_cutoff value.
-
-    Returns:
-    - Y: Numpy array of shape [num_samples, num_classes] containing the class labels.
-    """
     X, _ = to_device(X, Y, device)
+
+    #se X for vazio, retorna Y sem alterações
+    if not isinstance(X, torch.Tensor) or X.shape[1] == 0:
+        print("drop_class: entrada inválida detectada, arquivo ignorado")
+        return Y
+
     Y_pred = model(X)
     class_probs = Y_pred.cpu().detach().numpy()
     class_probs *= Y
@@ -317,7 +310,6 @@ def drop_class(model, X, Y, device, confidence_cutoff):
     drop_indices = confidence < confidence_cutoff
 
     Y[drop_indices] = 0
-
     return Y
 
 
