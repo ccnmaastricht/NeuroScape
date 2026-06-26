@@ -2,7 +2,7 @@
 
 ## PR #1 (Maldinni)
 
-Review written to `pr1_review.md`. Three fixes requested before merge:
+Three fixes requested before merge:
 
 1. Revert `config/analysis/semantic.toml` to original values (`model_name`, `max_abstract_number`, `temperature`, `retries`) — the Colab notebooks don't read this file, so the changes only break the production scripts.
 2. Revert `config/preprocessing/classifier.toml` `num_classes` back to 26.
