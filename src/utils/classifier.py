@@ -298,8 +298,9 @@ def to_device(X, Y, device):
 def drop_class(model, X, Y, device, confidence_cutoff):
     X, _ = to_device(X, Y, device)
 
-    # se o batch for vazio, retorna Y sem alterações
-    if X.shape[0] == 0:
+    # se o batch for vazio (0 amostras) ou os embeddings não tiverem
+    # features (shape 1x0, causa do RuntimeError de matmul), retorna Y inalterado
+    if X.numel() == 0 or X.shape[1] == 0:
         print("drop_class: empty batch detected, skipping")
         return Y
 
