@@ -298,9 +298,9 @@ def to_device(X, Y, device):
 def drop_class(model, X, Y, device, confidence_cutoff):
     X, _ = to_device(X, Y, device)
 
-    #se X for vazio, retorna Y sem alterações
-    if not isinstance(X, torch.Tensor) or X.shape[1] == 0:
-        print("drop_class: entrada inválida detectada, arquivo ignorado")
+    # se o batch for vazio, retorna Y sem alterações
+    if X.shape[0] == 0:
+        print("drop_class: empty batch detected, skipping")
         return Y
 
     Y_pred = model(X)
