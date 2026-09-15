@@ -12,7 +12,7 @@ required_fields = ['Open Questions']
 [trends]
 max_abstract_number = 200
 older_cutoff = 2010
-recent_cutoff = 2023
+recent_cutoff = 2021
 required_fields = [
                  'Emerging Themes',
                  'Emerging Methodological Approaches',
@@ -23,7 +23,7 @@ required_fields = [
 [dimensions]
 max_abstract_number = 250
 older_cutoff = 2010
-recent_cutoff = 2023
+recent_cutoff = 2021
 required_fields = [
                 'Dimension 1 - Appliedness', 'Dimension 2 - Modality',
                 'Dimension 3 - Spatiotemporal Scale',
