@@ -296,11 +296,25 @@ def to_device(X, Y, device):
 
 
 def drop_class(model, X, Y, device, confidence_cutoff):
+    """
+    Drop the classes below the confidence_cutoff.
+
+    Empty batches are returned unchanged, as the forward pass is undefined for them.
+
+    Parameters:
+    - model: PyTorch model
+    - X: Numpy array of shape [num_samples, num_features] containing the input features.
+    - Y: Numpy array of shape [num_samples, num_classes] containing the class labels.
+    - device: PyTorch device.
+    - confidence_cutoff: Float, the confidence_cutoff value.
+
+    Returns:
+    - Y: Numpy array of shape [num_samples, num_classes] containing the class labels.
+    """
     X, _ = to_device(X, Y, device)
 
-    # se o batch for vazio (0 amostras) ou os embeddings não tiverem
-    # features (shape 1x0, causa do RuntimeError de matmul), retorna Y inalterado
-    if X.numel() == 0 or X.shape[1] == 0:
+    # Empty shards would raise a RuntimeError in the matmul of the forward pass
+    if X.numel() == 0:
         print("drop_class: empty batch detected, skipping")
         return Y
 
@@ -311,6 +325,7 @@ def drop_class(model, X, Y, device, confidence_cutoff):
     drop_indices = confidence < confidence_cutoff
 
     Y[drop_indices] = 0
+
     return Y
 
 
