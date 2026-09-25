@@ -210,7 +210,17 @@ import spacy
 print("Environment successfully configured.")
 ```
 
-### **8. Changes Compared to the Original NeuroScape Project**
+### **8. Reference Files for the "Other Disciplines" Track**
+
+The Colab ingestion notebook expects a journal lookup table for the non-neuroscience disciplines at:
+
+```
+data/internal/reference/otherdisciplines/journal_lut_otherdisciplines.csv
+```
+
+This file is not part of the repository. It is a subset of `journal_lut.csv` (which relates Scimago journal names to PubMed journal names via the columns `Scimago` and `PubMed`), restricted to Computer Science journals. Create it before running the "other disciplines" ingestion cells.
+
+### **9. Changes Compared to the Original NeuroScape Project**
 
 This implementation differs from the original NeuroScape project in both scope and execution strategy. The original pipeline was designed to operate with proprietary APIs and large-scale resources, while this version focuses on reproducibility, accessibility, and hands-on experimentation within the constraints of Google Colab.
 
