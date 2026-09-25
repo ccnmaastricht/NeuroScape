@@ -89,14 +89,6 @@ Senden, M. (2025). NeuroScape (1.0.1) [Data set]. Zenodo. [https://doi.org/10.52
     - *scripts/semantic_analysis/cluster_distinction.py*  
     - Identify key differences between similar clusters.
 
-14. **Dimensions Extraction**  
-    - *scripts/semantic_analysis/assess_dimensions.py*  
-    - Analyze each cluster across multiple research dimensions (e.g., appliedness, modality).
-
-15. **Dimension Categorization**  
-    - *scripts/semantic_analysis/assess_dimension_categories.py*  
-    - Categorize clusters along specific sub-dimensions (e.g., fundamental vs clinical research within appliedness).
-
 16. **Open Questions**  
     - *scripts/semantic_analysis/extract_open_questions.py*  
     - Identify important open research questions from recent review articles.
@@ -104,6 +96,14 @@ Senden, M. (2025). NeuroScape (1.0.1) [Data set]. Zenodo. [https://doi.org/10.52
 17. **Trends Extraction**  
     - *scripts/semantic_analysis/extract_trends.py*  
     - Compare older vs. recent publications to reveal emerging and declining trends.
+
+14. **Dimensions Extraction**  
+    - *scripts/semantic_analysis/assess_dimensions.py*  
+    - Analyze each cluster across multiple research dimensions (e.g., appliedness, modality).
+
+15. **Dimension Categorization**  
+    - *scripts/semantic_analysis/assess_dimension_categories.py*  
+    - Categorize clusters along specific sub-dimensions (e.g., fundamental vs clinical research within appliedness).
 
 18. **Density Graph**  
     - *scripts/graph_analysis/cluster_density.py*  
@@ -135,6 +135,90 @@ Once PyTorch is installed, install the remaining dependencies from `requirements
 ```bash
 pip install -r requirements.txt
 ```
+
+---
+
+## **Setup Instructions for Google Colab**
+
+### **1. Open Google Colab**
+
+Open a new notebook in **Google Colab**:
+
+* **Visit**: [https://colab.research.google.com](https://colab.research.google.com)
+* Select **Python 3** as the runtime environment.
+
+### **2. Mount Google Drive**
+
+The NeuroScape project relies on Google Drive for data storage, checkpoints, and outputs. Mount your Drive at the beginning of the notebook:
+
+```bash
+from google.colab import drive
+drive.mount('/content/drive')
+```
+
+### **3. Set Project BASEPATH**
+
+Define the base path of the NeuroScape project inside your Google Drive. This path will be used throughout the pipeline:
+
+```bash
+import os
+
+BASEPATH = "/content/drive/MyDrive/NeuroScape"
+os.chdir(BASEPATH)
+```
+
+### **4. Install PyTorch**
+
+Install PyTorch **before** installing other dependencies. Follow the official PyTorch instructions for Colab:
+
+* **Visit**: [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/)
+
+A typical Colab installation example:
+
+```bash
+pip install torch torchvision torchaudio
+```
+
+### **5. Install Project Dependencies**
+
+Install all remaining dependencies listed in `requirements.txt` or execute the "INSTALL LIBRARIES" in each notebook:
+
+```bash
+pip install -r requirements.txt
+```
+
+### **6. Environment Variables**
+
+If the project uses API keys or environment variables, create a `.env` file inside the project directory and load it:
+
+```bash
+from dotenv import load_dotenv
+load_dotenv(os.path.join(BASEPATH, "keys.env"))
+```
+
+Make sure to update `keys.env` with your own credentials before running the pipeline.
+
+### **7. Verify Installation**
+
+Run a simple import test to ensure all core libraries are correctly installed:
+
+```bash
+import torch
+import pandas as pd
+import spacy
+
+print("Environment successfully configured.")
+```
+
+### **8. Changes Compared to the Original NeuroScape Project**
+
+This implementation differs from the original NeuroScape project in both scope and execution strategy. The original pipeline was designed to operate with proprietary APIs and large-scale resources, while this version focuses on reproducibility, accessibility, and hands-on experimentation within the constraints of Google Colab.
+
+Key adaptations include reducing the overall scope to allow in-depth study of each pipeline stage, restructuring input and output handling to run entirely on Colab, and replacing closed-source components with open-source alternatives whenever possible. Additionally, several steps of the pipeline were reimplemented or reordered to better reflect the actual execution logic found in the source code, rather than the original documentation.
+
+These changes preserve the conceptual foundation of the original work while enabling practical experimentation, extensibility, and cost-free execution in a constrained computational environment. You must checkout  the input and output folders to create if doesn't exist or rename it. 
+
+---
 
 ## Disclaimer
 

@@ -299,6 +299,8 @@ def drop_class(model, X, Y, device, confidence_cutoff):
     """
     Drop the classes below the confidence_cutoff.
 
+    Empty batches are returned unchanged, as the forward pass is undefined for them.
+
     Parameters:
     - model: PyTorch model
     - X: Numpy array of shape [num_samples, num_features] containing the input features.
@@ -310,6 +312,12 @@ def drop_class(model, X, Y, device, confidence_cutoff):
     - Y: Numpy array of shape [num_samples, num_classes] containing the class labels.
     """
     X, _ = to_device(X, Y, device)
+
+    # Empty shards would raise a RuntimeError in the matmul of the forward pass
+    if X.numel() == 0:
+        print("drop_class: empty batch detected, skipping")
+        return Y
+
     Y_pred = model(X)
     class_probs = Y_pred.cpu().detach().numpy()
     class_probs *= Y
