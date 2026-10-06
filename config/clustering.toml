@@ -5,3 +5,9 @@ num_resolution_parameter = 1000
 [graph_construction]
 batch_size = 100
 num_neighbors = 50
+
+[assignment]
+# Assignment of articles added after clustering (NeuroScape 2.0): similarity-weighted kNN vote
+# among the clustered (v1) articles. k matches graph_construction.num_neighbors.
+num_neighbors = 50
+validation_year = 2023

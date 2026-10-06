@@ -80,7 +80,7 @@ No retraining.
 - Fetch in/out links for new articles only.
 - Add back-links to v1 articles' `in_links` by symmetry. No refetch for v1 articles.
 
-**Phase 5 — Cluster assignment** (new script `scripts/clustering/assign_to_clusters.py`)
+**Phase 5 — Cluster assignment** (new script `scripts/clustering/assign_to_clusters.py`; outcome: kNN, see §9)
 - Method: nearest centroid in cosine space on L2-normalised domain embeddings. Centroids
   come from v1 members.
 - Stored per article: `Cluster ID`, similarity to the assigned centroid, and the margin to the
@@ -110,7 +110,7 @@ No retraining.
 | Column | Meaning |
 |---|---|
 | `Added In` | `1.0` (in v1), `2.0` (2024–2025) or `2.0-late` (1999–2023 added in 2.0) |
-| `Assignment Similarity`, `Assignment Margin` | Only for articles assigned in 2.0. v1 articles keep their Leiden labels (NaN) |
+| `Assignment Share`, `Assignment Margin` | Similarity-weighted kNN vote share of the assigned cluster, and its lead over the runner-up. Only for articles assigned in 2.0; v1 articles keep their Leiden labels (NaN) |
 | `Citations Fetched` | Date the CrossRef count was fetched |
 
 The citation-rate reference date goes in the release README.
@@ -211,3 +211,19 @@ If a Voyage model is retired mid-run:
   CSV/lite/large/domain. Lite and large embeddings match their models (cosine 1.0). The domain model
   reproduces the stored delta domain embeddings exactly (max abs diff 0.0).
 - Run after the scrape: `Internal/Logs/run_phase2_3.sh` (log to `Internal/Logs/phase2_3.log`).
+
+### Phase 5 — method decided and validated 2026-10-06
+
+- Holdout validation: Leiden labels of v1 2023 articles vs. assignment using 1999–2022 articles only.
+  - Nearest centroid (L2 mean): **0.765**; repo spherical centroids (`get_centroids`): 0.736. Both are
+    below the 0.80 threshold, so per the spec we fall back to kNN.
+  - kNN majority: k=10 0.917, k=25 0.947, **k=50 0.955**, k=100 0.936. Similarity-weighted k=50:
+    **0.959**. Holding out 2015 instead gives 0.964.
+- **Method:** similarity-weighted kNN vote, k = 50 (equals `graph_construction.num_neighbors`). Neighbours
+  are v1 articles only, so the v1 clustering is the fixed reference and new articles don't influence
+  each other. Config: `config/clustering.toml [assignment]`.
+- The vote share is a good confidence measure. In the validation, articles with share ≥ 0.7 (66%)
+  agree 1.000, 0.5–0.7 (19%) agree 0.956, and < 0.5 (15%) agree 0.790. The share and margin are released per article.
+- Script: `scripts/clustering/assign_to_clusters.py` (`--validate` reruns the holdout). It assigns the
+  2025-10 delta and the new articles from `Internal/Intermediate/HDF5/DomainEmbeddings` and writes
+  `Internal/Intermediate/CSV/Neuroscience/articles_assigned.csv`.
