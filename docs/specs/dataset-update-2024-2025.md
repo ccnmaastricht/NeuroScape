@@ -192,7 +192,7 @@ If a Voyage model is retired mid-run:
   so the Sep 2025 scrape was essentially complete. Rate is about 7,000 PMIDs/h; Neuroscience 2025
   expected done around 22:00, Multidisciplinary around midday on 2026-10-07.
 - **Finding:** about 21% of newly scraped rows have `Year` 2026 (online in 2025, issue dated 2026).
-  `year_cutoff = 2025` drops them, consistent with v1 (decision pending).
+  `year_cutoff = 2025` drops them, consistent with v1. **Decided 2026-10-06: drop** (they enter with the next update).
 - **Finding:** `habanero.counts.citation_count` (CrossRef OpenURL) fails for every DOI, so `Citations`
   is NaN in all raw shards since Sep 2025, including the 2025-10 delta. Harmless because Phase 7 refetches
   all counts, but Phase 7 must use the REST API (`api.crossref.org/works/{doi}` → `is-referenced-by-count`).
