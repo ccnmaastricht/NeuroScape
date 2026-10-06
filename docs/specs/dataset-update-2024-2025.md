@@ -109,7 +109,7 @@ No retraining.
 
 | Column | Meaning |
 |---|---|
-| `Added In` | `1.0` (in v1), `2.0` (2024–2025) or `2.0-late` (1999–2023 added in 2.0) |
+| `Added In` | `v1.0` (in v1), `v2.0` (2024–2025) or `v2.0-late` (1999–2023 added in 2.0) |
 | `Assignment Share`, `Assignment Margin` | Similarity-weighted kNN vote share of the assigned cluster, and its lead over the runner-up. Only for articles assigned in 2.0; v1 articles keep their Leiden labels (NaN) |
 | `Citations Fetched` | Date the CrossRef count was fetched |
 
@@ -256,3 +256,41 @@ If a Voyage model is retired mid-run:
 - January: `Internal/Logs/run_phase7_january.sh` (citations for all, then link candidates refetched for
   2024–2025), then Phase 6 assembly with reference date 2027-01-01.
 - Shared helpers: `src/utils/update.py` (dataset loading, DOI normalization, CrossRef batching, JSONL).
+
+### Phase 6 — code ready, tested 2026-10-06
+
+- New `scripts/ingestion/assemble_dataset.py`, `src/utils/assembly.py` and `config/ingestion/assembly.toml`
+  (version, year range, `reference_date = 2027-01-01`, shard size). Writes to `Public/Data/` of the v2
+  root (or `--output`):
+  - `CSV/neuroscience_articles_1999-2025.csv`: v1 columns plus `Added In`, `Assignment Share`,
+    `Assignment Margin` and `Citations Fetched`. v1 rows come first in v1 order, then added articles sorted
+    by Year, Journal, Type.
+  - `CSV/neuroscience_clusters_1999-2025.csv`: v1 text columns unchanged; updated `Size`,
+    `Year First Article`, `MCR Research/Review`, Krackhardt indices and most cited/citing clusters.
+  - `HDF5/DomainEmbeddings/shard_*.h5`: all articles, same order as the CSV, with updated links, age and
+    citations. A missing citation count is stored as -1 in the HDF5 and NaN in the CSV.
+  - `Graphs/article_citation.graphml` (rebuilt) and `Graphs/cluster_citation_density.graphml` (rebuilt);
+    `article_similarity.graphml`, dimensions/trends CSVs and models are copied from v1.
+  - `assembly_report.json` (counts per source and year, link totals, provisional flag).
+- Modes: **provisional** (no `--citations`): v1 rows keep their v1 citation values, added articles have
+  no counts. **Final** (`--citations citations_2027-01.jsonl`): all counts from the refresh, ages
+  and rates relative to `reference_date`. Runner: `Internal/Logs/run_phase6.sh`
+  (`CITATIONS=... ./run_phase6.sh` for final).
+- Link handling: candidates are resolved against the full dataset (DOIs case-insensitive, self-links
+  dropped). Later candidate files override earlier ones per article. Then in/out links are made symmetric
+  across all articles (as `update_links` did in v1).
+- **Density analysis reimplemented with sparse matrices.** On v1 inputs it reproduces the published v1
+  values exactly: Krackhardt max abs diff 6e-16, most cited/citing clusters 175/175 identical, density
+  weights max rel diff 5e-15. Runtime 21 s.
+- **Finding (published v1 data):** `article_citation.graphml` in Zenodo 1.0.1 has 2,396,655 edges, but
+  v1's out-links total 7,702,484. It contains the complete out-links of only 128,894 of the 415,393
+  articles with out-links. All its edges are correct (citing → cited), the rest are missing. It was built in
+  `results_0x_katz_ignore.ipynb` (likely interrupted or wrongly skipped articles). The paper figures and
+  the density/Krackhardt statistics do not use it (they use the HDF5 links). The v2 graph is complete.
+  Candidate for an erratum / 1.0.2.
+- Provisional test (v1 + 2025-10 delta + 300 dry-run link records; `Internal/Test/assembly_provisional`):
+  - 506,221 articles (461,316 v1.0 / 26,721 v2.0 / 18,184 v2.0-late), no duplicate PMIDs/DOIs.
+  - v1 rows identical to v1 in all v1 columns and order. HDF5 order matches the CSV.
+  - Links symmetric (in = out = 7,707,798). All v1 links preserved; 4,836 v1 articles gained links.
+  - Article graph edges = out-link total. Cluster sizes sum to the total, text columns unchanged.
+  - A rerun into the same output works. Runtime about 15 min.

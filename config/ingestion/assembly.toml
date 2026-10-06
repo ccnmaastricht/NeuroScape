@@ -1,0 +1,7 @@
+# Assembly of the updated dataset (NeuroScape 2.0)
+version = '2.0'
+start_year = 1999
+end_year = 2025
+# Ages and citation rates are computed relative to this date (not the date the script runs)
+reference_date = '2027-01-01'
+items_per_shard = 200
