@@ -19,6 +19,27 @@ load_dotenv(find_dotenv())
 BASEPATH = os.environ['BASEPATH']
 EMAIL = os.environ['EMAIL']
 
+
+def build_areas_lookup(input_files):
+    """
+    Map journal titles to Scimago subject areas, using the most recent file that has an 'Areas' column.
+    Recent Scimago exports (2025 onwards) no longer contain this column.
+
+    Parameters:
+    - input_files: list of str
+
+    Returns:
+    - areas_lookup: dict
+    """
+    areas_lookup = {}
+    for file in sorted(input_files):
+        scimago_df = pd.read_csv(file, sep=';')
+        if 'Areas' in scimago_df.columns:
+            areas_lookup.update(zip(scimago_df['Title'], scimago_df['Areas']))
+
+    return areas_lookup
+
+
 if __name__ == '__main__':
 
     # Initialize the ArticleMetadata
@@ -32,6 +53,8 @@ if __name__ == '__main__':
     discipline = parse_discipline()
     quartile = parse_quartile()
     max_results = parse_max_results()
+    start_year = parse_start_year()
+    end_year = parse_end_year()
 
     print(f'Scraping data for {discipline}...')
 
@@ -39,6 +62,11 @@ if __name__ == '__main__':
     input_folder = os.path.join(
         BASEPATH, directories['internal']['reference']['scimago'], discipline)
     input_files = glob.glob(os.path.join(input_folder, "*.csv"))
+    areas_lookup = build_areas_lookup(input_files)
+    input_files = [
+        file for file in input_files if start_year <= int(
+            os.path.basename(file).split(prefix)[1].split(suffix)[0]) <= end_year
+    ]
 
     checkpoints_folder = os.path.join(BASEPATH,
                                       directories['internal']['checkpoints'])
@@ -81,9 +109,12 @@ if __name__ == '__main__':
             print(f' Journal: {journal}')
 
             # Get the disciplines this journal falls under
-            disciplines = scimago_df[scimago_df['Title'] ==
-                                     journal]['Areas'].values[0].replace(
-                                         ';', ' /')
+            if 'Areas' in scimago_df.columns:
+                areas = scimago_df[scimago_df['Title'] ==
+                                   journal]['Areas'].values[0]
+            else:
+                areas = areas_lookup.get(journal, discipline)
+            disciplines = areas.replace(';', ' /')
 
             # Check if the journal has an alternate name
             query_journal = check_alternate_journal_names(journal, lut)
@@ -94,6 +125,7 @@ if __name__ == '__main__':
             """
 
             # Try to get the PubMed IDs for the query
+            pubmed_ids = None
             for _ in range(num_attempts):
                 try:
                     pubmed_ids = get_id_list(query,
@@ -124,6 +156,7 @@ if __name__ == '__main__':
                 processed_articles.add(article_id)
 
                 # Try to fetch the metadata for the article
+                metadata = None
                 for _ in range(num_attempts):
                     try:
                         metadata = articlemetadata.fetch(article_id)
@@ -149,3 +182,8 @@ if __name__ == '__main__':
                                                f'shard_{shard_id:04d}.csv')
                     num_items = 0
             print(f' Articles obtained: {obtained_articles}')
+
+    # Save the last (partial) shard
+    if num_items > 0:
+        save_data(data, output_file)
+    save_processed_articles(processed_file, processed_articles)
