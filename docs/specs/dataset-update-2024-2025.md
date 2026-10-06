@@ -188,3 +188,26 @@ If a Voyage model is retired mid-run:
   2024–2025, one after the other because they share a checkpoint file. Log: `Internal/Logs/phase1_scrape.log`.
 - Note: `max_results = 5000` per journal-year, as in v1. Very large multidisciplinary journals are
   capped at 5000 articles per year (same as v1).
+- Progress 16:54: Neuroscience 2024 top-up finished in about 6 min. 40,883 PMIDs checked, only 82 new,
+  so the Sep 2025 scrape was essentially complete. Rate is about 7,000 PMIDs/h; Neuroscience 2025
+  expected done around 22:00, Multidisciplinary around midday on 2026-10-07.
+- **Finding:** about 21% of newly scraped rows have `Year` 2026 (online in 2025, issue dated 2026).
+  `year_cutoff = 2025` drops them, consistent with v1 (decision pending).
+- **Finding:** `habanero.counts.citation_count` (CrossRef OpenURL) fails for every DOI, so `Citations`
+  is NaN in all raw shards since Sep 2025, including the 2025-10 delta. Harmless because Phase 7 refetches
+  all counts, but Phase 7 must use the REST API (`api.crossref.org/works/{doi}` → `is-referenced-by-count`).
+
+### Phase 2–3 — code ready, tested 2026-10-06
+
+- `merge_and_clean.py --year_cutoff` overrides the config value (the default is unchanged).
+- New `scripts/ingestion/remove_known_articles.py` drops articles already in Base/V1 or the delta
+  (matched by PMID or DOI). It keeps the complete dataframe as `articles_merged_cleaned_all.csv`.
+- Articles that were embedded and rejected by the classifier in Oct 2025 (multi-area journals such as
+  Medicine / Neuroscience) are skipped by `initial_embedding.py` via its checkpoint. They have no
+  embedding shard in v2 and drop out again in `filter_disciplines.py`. They are not paid for twice.
+- In the v2 root the existing scripts write to empty `Internal/Intermediate/*` directories, so their
+  in-place rewrites only touch new articles.
+- Smoke test on a sample (scratch root): 484 new articles, 337 kept. PMIDs are identical across
+  CSV/lite/large/domain. Lite and large embeddings match their models (cosine 1.0). The domain model
+  reproduces the stored delta domain embeddings exactly (max abs diff 0.0).
+- Run after the scrape: `Internal/Logs/run_phase2_3.sh` (log to `Internal/Logs/phase2_3.log`).

@@ -27,3 +27,8 @@ csv = 'Public/Data/CSV'
 graphs = 'Public/Data/Graphs'
 hdf5 = 'Public/Data/HDF5/DomainEmbeddings'
 models = 'Public/Data/Models'
+
+# Dataset update (NeuroScape 2.0): read-only inputs inside the v2 data root
+[internal.update]
+base = 'Internal/Base/V1'
+delta = 'Internal/Delta/2025-10'

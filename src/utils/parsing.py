@@ -43,6 +43,10 @@ def parse_args():
                         type=int,
                         default=2023,
                         help='Ending year for scraping articles.')
+    parser.add_argument('--year_cutoff',
+                        type=int,
+                        default=None,
+                        help='Override the year cutoff from the cleaning config.')
 
     return parser.parse_args()
 
@@ -110,3 +114,16 @@ def parse_max_results():
     max_results = parse_args().max_results
 
     return max_results
+
+
+def parse_year_cutoff():
+    """
+    Get the year cutoff override from the command line arguments.
+
+    Returns:
+    - year_cutoff: int or None
+    """
+
+    year_cutoff = parse_args().year_cutoff
+
+    return year_cutoff

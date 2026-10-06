@@ -1,7 +1,7 @@
 import os
 import glob
 from src.utils.cleaning import *
-from src.utils.parsing import parse_directories, parse_discipline
+from src.utils.parsing import parse_directories, parse_discipline, parse_year_cutoff
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -12,8 +12,9 @@ if __name__ == '__main__':
     directories = parse_directories()
     config = load_configurations()
 
+    year_cutoff = parse_year_cutoff() or config['year_cutoff']
     cutoffs = (config['word_limit']['lower'], config['word_limit']['upper'],
-               config['year_cutoff'])
+               year_cutoff)
     discipline = parse_discipline()
     raw_directory = os.path.join(BASEPATH, directories['internal']['raw'],
                                  discipline)
