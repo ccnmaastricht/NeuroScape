@@ -148,6 +148,10 @@ If a Voyage model is retired mid-run:
 - **Finding:** `NeuroScape/Public/Data/CSV/neuroscience_dimensions_1999-2023.csv` was overwritten
   in Oct 2025 (NatureTalk re-run). The v1 file is preserved as `... (copy).csv`, byte-identical
   to `NeuroScape_original`. All other `Public/Data` files match `NeuroScape_original`.
+  **Fixed 2026-10-06:** the v1 file is restored under its original name and the NatureTalk version is
+  renamed to `neuroscience_dimensions_1999-2023_naturetalk.csv`. The `NeuroScape/Public` manifest was
+  regenerated. All v1 files now match `NeuroScape_original`; the only extras are
+  `dimensions_all.csv` and the `_naturetalk` file.
 - Voyage models were verified by re-embedding stored abstracts (cosine 1.0): delta
   `VoyageAIEmbeddingsOriginal` = `voyage-lite-02-instruct`, delta `VoyageAIEmbeddings` =
   `voyage-large-2-instruct`. The old config value `voyage-lite-2-instruct` is not a valid model name.
