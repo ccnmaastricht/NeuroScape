@@ -294,3 +294,8 @@ If a Voyage model is retired mid-run:
   - Links symmetric (in = out = 7,707,798). All v1 links preserved; 4,836 v1 articles gained links.
   - Article graph edges = out-link total. Cluster sizes sum to the total, text columns unchanged.
   - A rerun into the same output works. Runtime about 15 min.
+- Final-mode test (synthetic refresh covering all 506,221 articles; test outputs deleted afterwards):
+  - Every article has a count and fetch date. `Citation Rate = Citations / Age` exactly.
+  - Ages are measured to 2027-01-01: v1 ages shift by +1.99 years (IQR 0.004), so v1 ages were
+    measured around January 2025.
+  - The HDF5 and cluster MCRs use the refreshed values.
