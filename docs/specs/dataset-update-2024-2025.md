@@ -227,3 +227,32 @@ If a Voyage model is retired mid-run:
 - Script: `scripts/clustering/assign_to_clusters.py` (`--validate` reruns the holdout). It assigns the
   2025-10 delta and the new articles from `Internal/Intermediate/HDF5/DomainEmbeddings` and writes
   `Internal/Intermediate/CSV/Neuroscience/articles_assigned.csv`.
+
+### Phase 4 — code ready, dry-run 2026-10-06
+
+- New `scripts/ingestion/fetch_new_links.py`. For every non-v1 article (the delta plus new ones) it stores
+  raw candidates in `Internal/Intermediate/Links/link_candidates.jsonl`: citing PMIDs from PubMed
+  `pubmed_pubmed_citedin` (batched, 200 per request) and reference DOIs from CrossRef (batched, 100 per
+  request). Same sources as v1's `build_adjacencies.py`.
+- Candidates are stored **unfiltered**. Intersecting them with the dataset and adding back-links to v1
+  articles happen at assembly (Phase 6), so they stay valid if the set of articles changes.
+  The script is resumable.
+- **Decision (made while implementing):** reference DOIs are matched **case-insensitively**. 9.5% of v1
+  DOIs contain uppercase letters, while CrossRef reference lists often spell them differently, so v1's
+  exact matching missed some links. New links are therefore slightly more complete than v1's.
+  v1 links are not recomputed (out of scope).
+- Dry run: 300 delta articles in 36 s (about 8/s, so about 100K articles in 3–4 h). All 300 had
+  references; median 48 references and 8 citing articles.
+- Run: `Internal/Logs/run_phase4_5.sh` (link candidates, then cluster assignment) after Phases 2–3.
+
+### Phase 7 — script ready, dry-run 2026-10-06
+
+- New `scripts/ingestion/refresh_citations.py`. Fetches `is-referenced-by-count` from the CrossRef REST
+  API (polite pool, 100 DOIs per request) for **all** articles (base, delta, new), and appends
+  `Pmid, Doi, Citations, Fetched` to `Internal/Intermediate/Citations/citations_<tag>.jsonl`. Resumable.
+- Dry run on 1,000 random articles took 11 s (so about 1.5 h for all ~530K). 1 DOI was not found in
+  CrossRef. For v1 articles: median count 26 → 33, and 99.5% have count ≥ v1. An interrupted run
+  (500/1000) resumed to exactly the same 1,000 articles with no duplicates.
+- January: `Internal/Logs/run_phase7_january.sh` (citations for all, then link candidates refetched for
+  2024–2025), then Phase 6 assembly with reference date 2027-01-01.
+- Shared helpers: `src/utils/update.py` (dataset loading, DOI normalization, CrossRef batching, JSONL).

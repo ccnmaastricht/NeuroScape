@@ -4,51 +4,15 @@ from the merged and cleaned dataframe, so that only new articles are embedded an
 """
 
 import os
-import glob
-import h5py
 import pandas as pd
 
 from src.utils.parsing import parse_directories, parse_discipline
+from src.utils.update import normalize_doi, load_known_from_hdf5
 
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 BASEPATH = os.environ['BASEPATH']
-
-
-def normalize_doi(dois):
-    """
-    Normalize DOIs for matching.
-
-    Parameters:
-    - dois: pd.Series
-
-    Returns:
-    - dois: pd.Series
-    """
-
-    return dois.astype(str).str.strip().str.lower()
-
-
-def load_known_from_hdf5(directory):
-    """
-    Load the PubMed IDs and DOIs of all articles stored in a directory of HDF5 shards.
-
-    Parameters:
-    - directory: str
-
-    Returns:
-    - known: pd.DataFrame with columns 'Pmid' and 'Doi'
-    """
-
-    pmids, dois = [], []
-    for file_name in glob.glob(os.path.join(directory, '*.h5')):
-        with h5py.File(file_name, 'r') as file:
-            pmids.extend(file['pmid'][:].tolist())
-            dois.extend(doi.decode() if isinstance(doi, bytes) else doi
-                        for doi in file['doi'][:])
-
-    return pd.DataFrame({'Pmid': pmids, 'Doi': dois})
 
 
 if __name__ == '__main__':
@@ -72,15 +36,9 @@ if __name__ == '__main__':
     known_dois = set(normalize_doi(known_df['Doi']))
     print(f'Known articles: {len(base_df)} (base) + {len(delta_df)} (delta).')
 
+    # Filtering is idempotent; rerun merge_and_clean.py to start from the complete dataframe
     cleaned_file = os.path.join(cleaned_directory, 'articles_merged_cleaned.csv')
-    all_file = os.path.join(cleaned_directory, 'articles_merged_cleaned_all.csv')
-
-    # Keep the complete cleaned dataframe so that this step can be rerun
-    # (a freshly merged dataframe replaces the stored one)
-    if not os.path.exists(all_file) or os.path.getmtime(
-            cleaned_file) > os.path.getmtime(all_file):
-        os.replace(cleaned_file, all_file)
-    df = pd.read_csv(all_file)
+    df = pd.read_csv(cleaned_file)
 
     known = df['Pmid'].isin(known_pmids) | normalize_doi(
         df['Doi']).isin(known_dois)

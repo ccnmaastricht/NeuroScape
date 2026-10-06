@@ -17,6 +17,8 @@ graphs = 'Internal/Intermediate/Graphs'
 models = 'Internal/Intermediate/Models'
 embeddings = 'Internal/Intermediate/Embeddings'
 classifier = 'Internal/Intermediate/Embeddings/Classifier'
+links = 'Internal/Intermediate/Links'
+citations = 'Internal/Intermediate/Citations'
 
 [internal.intermediate.hdf5]
 voyage = 'Internal/Intermediate/HDF5/VoyageAIEmbeddings'
