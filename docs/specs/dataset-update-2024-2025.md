@@ -136,3 +136,38 @@ If a Voyage model is retired mid-run:
 - **lite gone:** replace the discipline filter with a classifier trained on large embeddings
   and keep the domain model.
 - **large gone:** blocker; stop and discuss.
+
+## 9. Progress log
+
+### Phase 0 — done 2026-10-06
+
+- Tag `aperture-neuro` → `3612330`; work on branch `dataset-v2`.
+- Manifests: `NeuroScape_v2/Manifests/v1_NeuroScape_Public.sha256` (6,944 files) and
+  `v1_NeuroScape_original.sha256` (13,514 files). `NeuroScape/Public`, `NeuroScape_original`,
+  the manifests and `Base/V1` are read-only (`chmod -R a-w`).
+- **Finding:** `NeuroScape/Public/Data/CSV/neuroscience_dimensions_1999-2023.csv` was overwritten
+  in Oct 2025 (NatureTalk re-run). The v1 file is preserved as `... (copy).csv`, byte-identical
+  to `NeuroScape_original`. All other `Public/Data` files match `NeuroScape_original`.
+- Voyage models were verified by re-embedding stored abstracts (cosine 1.0): delta
+  `VoyageAIEmbeddingsOriginal` = `voyage-lite-02-instruct`, delta `VoyageAIEmbeddings` =
+  `voyage-large-2-instruct`. The old config value `voyage-lite-2-instruct` is not a valid model name.
+  Both names are now in `config/ingestion/initial_embedding.toml`.
+- Environment: conda env `neuroscape_v2` (Python 3.12, torch 2.7.1+cu126), pinned in
+  `requirements-v2.lock`. `requirements.txt` lists `crossref` but the code needs `crossrefapi`
+  (fixed in the lock only).
+- v2 data root `/media/mario/HDD/Data/NeuroScape_v2`:
+
+  ```
+  Manifests/                      v1 checksums (read-only)
+  Internal/Base/V1/               copy of NeuroScape_original/Public/Data (read-only, verified)
+  Internal/Delta/2025-10/HDF5/    VoyageLite, VoyageLarge, Domain (44,905 articles, no links)
+  Internal/Delta/2025-10/CSV/     Neuroscience, Multidisciplinary CSVs of the Oct 2025 run
+  Internal/Raw/CSV/               raw scrape shards (Neuroscience, Multidisciplinary)
+  Internal/Reference/             Scimago (Neuroscience, Multidisciplinary), journal_lut.csv
+  Internal/Intermediate/Models/   classifier + domain-embedding model (identical to v1 public models)
+  Internal/Checkpoints/           scraped_articles.json, embedded_articles.json
+  ```
+
+- Run v2 steps with `BASEPATH` overriding `.env` (`load_dotenv` does not override existing variables):
+  `BASEPATH=/media/mario/HDD/Data/NeuroScape_v2 conda run -n neuroscape_v2 python scripts/...`
+- Open: Scimago 2025 lists (manual download, Cloudflare blocks scripts).

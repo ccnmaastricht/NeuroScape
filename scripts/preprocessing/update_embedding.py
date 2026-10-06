@@ -27,8 +27,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Re-embedding.')
     parser.add_argument('--model',
                         type=str,
-                        default='voyage-lite-02-instruct',
-                        help='The embedding model.')
+                        default=None,
+                        help='The embedding model (default: domain_input_model from the config).')
 
     return parser.parse_args()
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     _, sleep_time, batch_size, items_per_shard = unpack_embedding_parameters(
         embedding_parameters)
 
-    model = parse_model()
+    model = parse_model() or embedding_parameters['domain_input_model']
     embedding_model = VoyageAIEmbeddings(model=model,
                                          batch_size=batch_size,
                                          voyage_api_key=VOYAGE_API_KEY)
