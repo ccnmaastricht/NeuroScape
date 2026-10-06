@@ -173,5 +173,18 @@ If a Voyage model is retired mid-run:
   ```
 
 - Run v2 steps with `BASEPATH` overriding `.env` (`load_dotenv` does not override existing variables):
-  `BASEPATH=/media/mario/HDD/Data/NeuroScape_v2 conda run -n neuroscape_v2 python scripts/...`
-- Open: Scimago 2025 lists (manual download, Cloudflare blocks scripts).
+  `BASEPATH=/media/mario/HDD/Data/NeuroScape_v2 PYTHONPATH=. conda run -n neuroscape_v2 python scripts/...`
+  (from the repo root; scripts import `src.*`). Long runs use wrapper scripts and logs in
+  `NeuroScape_v2/Internal/Logs/`.
+- Scimago 2025 lists downloaded manually (Cloudflare blocks scripts). The 2025 export has no `Areas`
+  column; `scraping.py` takes it from the most recent earlier list (all 2025 Q1 journals are covered).
+
+### Phase 1 — started 2026-10-06 16:25
+
+- `scraping.py` now honours `--start_year/--end_year`, defaulting to 1999–2023 (the v1 range). Also
+  fixed: stale `pubmed_ids`/`metadata` after failed retries (could attach the previous article's metadata
+  to a PMID), and the final partial shard was never saved.
+- Run: `Internal/Logs/run_phase1_scrape.sh`, which runs Neuroscience then Multidisciplinary for
+  2024–2025, one after the other because they share a checkpoint file. Log: `Internal/Logs/phase1_scrape.log`.
+- Note: `max_results = 5000` per journal-year, as in v1. Very large multidisciplinary journals are
+  capped at 5000 articles per year (same as v1).
