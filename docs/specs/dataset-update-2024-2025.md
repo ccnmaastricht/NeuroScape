@@ -287,7 +287,12 @@ If a Voyage model is retired mid-run:
   articles with out-links. All its edges are correct (citing → cited), the rest are missing. It was built in
   `results_0x_katz_ignore.ipynb` (likely interrupted or wrongly skipped articles). The paper figures and
   the density/Krackhardt statistics do not use it (they use the HDF5 links). The v2 graph is complete.
-  Candidate for an erratum / 1.0.2.
+  **Resolved 2026-10-07, no 1.0.2:** the published Zenodo 1.0.1 (`NeuroScape_v101.zip`, md5
+  `d6273d39…` verified against the record) never contained `article_citation.graphml`; it existed only
+  locally. The complete v1 graph (7,702,484 edges; same nodes, order and cluster attributes; superset of
+  the old edges) replaced it in `NeuroScape/Public` and `NeuroScape_original`. The old file is kept as
+  `article_citation_incomplete.graphml`, and both manifests were regenerated (only these two files differ).
+  `Internal/Base/V1` in the v2 root still holds the old copy; it is not used (assembly rebuilds the graph).
 - Provisional test (v1 + 2025-10 delta + 300 dry-run link records; `Internal/Test/assembly_provisional`):
   - 506,221 articles (461,316 v1.0 / 26,721 v2.0 / 18,184 v2.0-late), no duplicate PMIDs/DOIs.
   - v1 rows identical to v1 in all v1 columns and order. HDF5 order matches the CSV.
@@ -299,3 +304,14 @@ If a Voyage model is retired mid-run:
   - Ages are measured to 2027-01-01: v1 ages shift by +1.99 years (IQR 0.004), so v1 ages were
     measured around January 2025.
   - The HDF5 and cluster MCRs use the refreshed values.
+
+### Phases 2–5 — running since 2026-10-07 18:17
+
+- The scrape finished cleanly: Neuroscience at 2026-10-06 23:04, Multidisciplinary at 2026-10-07 08:24
+  (450 journal-years, no failures).
+- `Internal/Logs/watch_and_run_phase2_5.sh` (log `watcher.log`) waits for the scrape, checks its log, then
+  runs `run_phase2_3.sh` (log `phase2_3.log`) and `run_phase4_5.sh` (log `phase4_5.log`). It stops at the
+  first failure and writes `=== ABORT ...` to `watcher.log`.
+- After `remove_known_articles`, Neuroscience: 34,128 (2025) + 21,406 (2024) + older. Most of the 2024 and
+  older ones were rejected by the classifier in Oct 2025 and are skipped by the embedding checkpoint; about
+  34K articles get embedded.
