@@ -8,6 +8,7 @@ set of articles changes. The script is resumable and requests are batched.
 """
 
 import os
+import socket
 import argparse
 from time import sleep
 from tqdm import tqdm
@@ -23,6 +24,9 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 BASEPATH = os.environ['BASEPATH']
 EMAIL = os.environ['EMAIL']
+
+# Fail (and retry) instead of hanging on stalled network requests
+socket.setdefaulttimeout(120)
 
 PUBMED_BATCH_SIZE = 200
 CROSSREF_BATCH_SIZE = 100

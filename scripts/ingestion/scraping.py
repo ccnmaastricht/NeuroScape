@@ -3,6 +3,7 @@ This script is designed to automate the process of scraping journal article meta
 """
 
 import os
+import socket
 import glob
 import pandas as pd
 from time import sleep
@@ -18,6 +19,9 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 BASEPATH = os.environ['BASEPATH']
 EMAIL = os.environ['EMAIL']
+
+# Fail (and retry) instead of hanging on stalled network requests
+socket.setdefaulttimeout(120)
 
 
 def build_areas_lookup(input_files):

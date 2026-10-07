@@ -59,7 +59,8 @@ citations and release.
 5. Pin the environment (`requirements-v2.lock`) and record package versions.
 
 **Phase 1 — Scrape**
-- Neuroscience and Multidisciplinary journals, same Scimago quartile rule as v1.
+- Neuroscience and Multidisciplinary journals, same Scimago quartile rule as v1: **Neuroscience Q1 + Q2,
+  Multidisciplinary Q1** (per year's list; inferred from v1's composition, see §9).
 - 2024: top-up only. The checkpoint skips PMIDs already processed, so this only adds
   articles indexed since Sep 2025. 2025: full scrape.
 - `scraping.py` must honour `--start_year/--end_year` (default 1999–2023 = v1 behaviour).
@@ -315,3 +316,18 @@ If a Voyage model is retired mid-run:
 - After `remove_known_articles`, Neuroscience: 34,128 (2025) + 21,406 (2024) + older. Most of the 2024 and
   older ones were rejected by the classifier in Oct 2025 and are skipped by the embedding checkpoint; about
   34K articles get embedded.
+- 18:17–20:08: Phases 2–3 completed on the Q1-only scrape (21,284 new articles kept: 20,676 from 2025 and
+  608 from 2024).
+- **Correction (2026-10-07): the quartile rule.** The 2025 count looked about 23% low against 2024. The cause:
+  v1 used Scimago **Q1 + Q2** for Neuroscience journals (and Q1 only for Multidisciplinary). Evidence:
+  v1 articles by that year's quartile were 2005 Q1 3,729 / Q2 2,916; 2015 Q1 11,527 / Q2 6,246; 2023 Q1 7,821 /
+  Q2 9,813, while Multidisciplinary is Q1 only. *Brain Sciences* is present exactly in the years it was Q2
+  and absent in its Q3 years. The Sep 2025 scrape (2024) also included Q2, but the Phase 1 run used the
+  script default `--quartile Q1`, so the 2025 Neuroscience Q2 journals were missing. For journals present
+  in both years, 2025 is at 96% of 2024. Fix: `Internal/Logs/run_q2_chain.sh` scrapes Neuroscience Q2 for
+  2024–2025 (log `phase1_scrape_q2.log`), clears the derived new-article HDF5 sets, then reruns Phases 2–3 and
+  4–5 (chain log `q2_chain.log`). Already embedded articles are skipped via checkpoint; the large-model
+  re-embedding of about 21K articles costs < $1.
+- **Fix: Phase 4 hang.** `fetch_new_links.py` stalled at 20:26 on a PubMed request without a timeout
+  (8,500 articles done, resumable). `socket.setdefaulttimeout(120)` was added to `fetch_new_links.py` and
+  `scraping.py`, so stalled requests fail and are retried. The watcher was stopped and replaced by the chain.
