@@ -1,7 +1,13 @@
 # Assembly of the updated dataset (NeuroScape 2.0)
 version = '2.0'
-start_year = 1999
+# 1980-1998 use proxy journal lists (no Scimago); abstract coverage is incomplete for 1980-1984
+start_year = 1980
 end_year = 2025
 # Ages and citation rates are computed relative to this date (not the date the script runs)
 reference_date = '2027-01-01'
 items_per_shard = 200
+# Copied into assembly_report.json and the release README
+notes = [
+  'Articles from 1980-1998 (Added In = v2.0-early) predate Scimago. Their journals are a proxy: journals meeting the v1 quartile rule (Neuroscience Q1+Q2, Multidisciplinary Q1) in at least 3 of 1999-2003, plus their earlier titles from the NLM Catalog. Journals that ceased or declined before 1999 are not included.',
+  'PubMed abstract coverage is incomplete for 1980-1984, so article counts for these years are lower than the true publication volume and the shortfall varies by journal. Articles without an abstract are excluded throughout NeuroScape.',
+]

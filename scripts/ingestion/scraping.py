@@ -59,13 +59,14 @@ if __name__ == '__main__':
     max_results = parse_max_results()
     start_year = parse_start_year()
     end_year = parse_end_year()
+    journal_lists = parse_journal_lists()
 
     print(f'Scraping data for {discipline}...')
 
     # Define the base directory and the input, processed, and output folders
     input_folder = os.path.join(
-        BASEPATH, directories['internal']['reference']['scimago'], discipline)
-    input_files = glob.glob(os.path.join(input_folder, "*.csv"))
+        BASEPATH, directories['internal']['reference'][journal_lists], discipline)
+    input_files = glob.glob(os.path.join(input_folder, f"{prefix}*.csv"))
     areas_lookup = build_areas_lookup(input_files)
     input_files = [
         file for file in input_files if start_year <= int(

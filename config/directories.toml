@@ -5,6 +5,8 @@ raw = 'Internal/Raw/CSV'
 [internal.reference]
 reference = 'Internal/Reference'
 scimago = 'Internal/Reference/Scimago'
+# Proxy lists for years before Scimago coverage (NeuroScape 2.0, 1980-1998)
+scimago_proxy = 'Internal/Reference/ScimagoProxy'
 pdfs = 'Internal/Reference/PDFs'
 
 [internal.manuscript]

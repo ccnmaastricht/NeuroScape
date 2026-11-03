@@ -43,6 +43,12 @@ def parse_args():
                         type=int,
                         default=2023,
                         help='Ending year for scraping articles.')
+    parser.add_argument('--journal_lists',
+                        type=str,
+                        default='scimago',
+                        choices=['scimago', 'scimago_proxy'],
+                        help='Journal lists to scrape: Scimago (1999 onwards) or the '
+                        'proxy lists for earlier years (build_proxy_journal_lists.py).')
     parser.add_argument('--year_cutoff',
                         type=int,
                         default=None,
@@ -127,3 +133,16 @@ def parse_year_cutoff():
     year_cutoff = parse_args().year_cutoff
 
     return year_cutoff
+
+
+def parse_journal_lists():
+    """
+    Get the journal lists (reference directory key) from the command line arguments.
+
+    Returns:
+    - journal_lists: str
+    """
+
+    journal_lists = parse_args().journal_lists
+
+    return journal_lists

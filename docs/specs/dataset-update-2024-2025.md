@@ -5,7 +5,7 @@ Status: **agreed** (spec interview 2026-10-06) · Supersedes the incremental-upd
 ## 1. Goal
 
 Publish **NeuroScape 2.0** on Zenodo (new version under the v1 concept DOI) covering
-1999–2025. Do all scraping and processing now (Oct 2026). In January 2027, refresh
+1999–2025 (**extended to 1980–2025 on 2026-11-03**, see §9 "Extension to 1980–1998"). Do all scraping and processing now (Oct 2026). In January 2027, refresh
 citations and release.
 
 ## 2. Constraint: the Aperture Neuro paper stays reproducible
@@ -110,7 +110,7 @@ No retraining.
 
 | Column | Meaning |
 |---|---|
-| `Added In` | `v1.0` (in v1), `v2.0` (2024–2025) or `v2.0-late` (1999–2023 added in 2.0) |
+| `Added In` | `v1.0` (in v1), `v2.0` (2024–2025), `v2.0-late` (1999–2023 added in 2.0) or `v2.0-early` (1980–1998, proxy journal lists) |
 | `Assignment Share`, `Assignment Margin` | Similarity-weighted kNN vote share of the assigned cluster, and its lead over the runner-up. Only for articles assigned in 2.0; v1 articles keep their Leiden labels (NaN) |
 | `Citations Fetched` | Date the CrossRef count was fetched |
 
@@ -331,3 +331,48 @@ If a Voyage model is retired mid-run:
 - **Fix: Phase 4 hang.** `fetch_new_links.py` stalled at 20:26 on a PubMed request without a timeout
   (8,500 articles done, resumable). `socket.setdefaulttimeout(120)` was added to `fetch_new_links.py` and
   `scraping.py`, so stalled requests fail and are retried. The watcher was stopped and replaced by the chain.
+
+### Extension to 1980–1998 — decided 2026-11-03, scrape running
+
+- **Decision:** v2 covers 1980–2025. Scimago starts in 1999, so 1980–1998 use **proxy journal lists**. The release
+  carries a note that 1980–1984 abstract coverage is incomplete. 1970 was rejected because PubMed has essentially
+  no abstracts before 1975.
+- **Why a proxy is acceptable:** the quartile rule is fairly stable over time. Of Neuroscience journals in Q1+Q2
+  in year *t* (and still listed), 93% are still in Q1+Q2 at *t*+1, 89% at +5, 86% at +10 and 81% at +20. For
+  Multidisciplinary Q1 the figures are 85%, 75%, 67% and 61%; that list is small and the classifier filters it anyway.
+- **Abstract coverage** (PubMed `hasabstract`, examples): J Neurophysiol 1970 0/66, 1975 97/101, 1980 77/184,
+  1985 202/203; Brain Res 1975 379/928, 1980 743/1229, 1985 1835/1841. Coverage is patchy and varies by journal
+  until about 1984, and essentially complete from 1985. Articles without an abstract are dropped by cleaning
+  (lower word limit), as in v1.
+- **Proxy rule** (new `scripts/ingestion/build_proxy_journal_lists.py`):
+  - Core: journals meeting the v1 rule (Neuroscience Q1+Q2, Multidisciplinary Q1) in at least 3 of 1999–2003.
+    The quartile is the modal in-rule quartile in those years.
+  - Renamed journals: the NLM Catalog's `Preceding` titles are followed by ISSN (up to 3 renames back) and
+    scraped under their MEDLINE abbreviation.
+  - Each year's list keeps only journals published that year (NLM first and end years).
+  - Output: `Internal/Reference/ScimagoProxy/<discipline>/`, one file per year in Scimago format, plus
+    `proxy_journals_<discipline>.csv`.
+  - Neuroscience: 173 core journals plus 29 preceding titles (e.g. Electroencephalogr Clin Neurophysiol →
+    Clinical Neurophysiology, Paraplegia → Spinal Cord, Anat Embryol → Brain Structure and Function). The
+    yearly lists hold 84 journals in 1980 and 168 in 1998.
+  - Multidisciplinary: 14 core journals, no renames.
+- **Known bias:** journals that ceased or declined before 1999 are missing (survivorship). The 1980–1984
+  article counts are thinned unevenly by missing abstracts.
+- **Volume** (PubMed counts for the proxy lists, capped at 5000 per journal-year):
+  - Neuroscience: 1980 8,428 (5,270 with abstract), 1989 16,135 (14,705), 1998 25,122 (22,910).
+  - Multidisciplinary: about 5,000–5,700 per year (3,200–4,100 with abstract).
+  - In total about 410K PMIDs. At about 2 PMIDs/s the scrape takes about 2.5 days.
+- **Code changes:**
+  - `scraping.py --journal_lists scimago_proxy` (default `scimago` = v1 behaviour); input files are matched by
+    the `scimagojr ` prefix. Directory key `scimago_proxy` added to `config/directories.toml`.
+  - `assembly.toml`: `start_year = 1980` plus `notes`, which are written to `assembly_report.json`.
+  - `assemble_dataset.py`: `Added In = v2.0-early` for Year < 1999, and added articles are filtered to
+    `start_year ≤ Year ≤ end_year`.
+- **Run** (started 2026-11-03 08:14): `Internal/Logs/run_early_scrape.sh` runs Neuroscience Q1, Neuroscience
+  Q2 and Multidisciplinary Q1 one after another. Logs: `phase1_scrape_early_<discipline>_<quartile>.log`.
+  The checkpoint before the run is backed up as `Checkpoints/scraped_articles.before_early.json`.
+- **Next (manual, after the scrape):** as in `run_q2_chain.sh`, clear the derived new-article HDF5 sets, then
+  run `run_phase2_3.sh` and `run_phase4_5.sh`, and rerun the Phase 6 provisional assembly. Then check:
+  - the `v2.0-early` counts per year and journal (sanity notebook);
+  - the `Assignment Share` distribution by year. Topics that faded before 1999 have no v1 cluster, so expect
+    lower shares for the 1980s.

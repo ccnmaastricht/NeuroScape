@@ -128,7 +128,8 @@ if __name__ == '__main__':
         added_articles += load_articles(new_hdf5_directory)
     added_articles = [
         article for article in added_articles
-        if article.pmid not in base_pmids and article.year <= end_year
+        if article.pmid not in base_pmids
+        and start_year <= article.year <= end_year
     ]
     added_articles = list({article.pmid: article
                            for article in added_articles}.values())
@@ -159,8 +160,10 @@ if __name__ == '__main__':
     ]].reset_index()
     added_df['Year'] = added_df['Year'].astype(int)
     added_df = added_df.join(assignment_df, on='Pmid')
-    added_df['Added In'] = np.where(added_df['Year'] >= 2024, 'v2.0',
-                                    'v2.0-late')
+    # v2.0-early: before Scimago coverage (1980-1998), journals from the proxy lists
+    added_df['Added In'] = np.select(
+        [added_df['Year'] >= 2024, added_df['Year'] < 1999],
+        ['v2.0', 'v2.0-early'], 'v2.0-late')
     added_df['Citations'] = np.nan
     added_df['Citation Rate'] = np.nan
     added_df['Citations Fetched'] = None
@@ -357,6 +360,7 @@ if __name__ == '__main__':
             'total': link_count
         },
         'link_candidate_articles': len(candidate_records),
+        'notes': configurations.get('notes', []),
     }
     with open(os.path.join(output_directory, 'assembly_report.json'),
               'w') as f:
