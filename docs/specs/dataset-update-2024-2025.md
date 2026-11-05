@@ -376,3 +376,17 @@ If a Voyage model is retired mid-run:
   - the `v2.0-early` counts per year and journal (sanity notebook);
   - the `Assignment Share` distribution by year. Topics that faded before 1999 have no v1 cluster, so expect
     lower shares for the 1980s.
+- **Scrape status 2026-11-05:**
+  - Neuroscience Q1: done 2026-11-04 10:52; 182,051 PMIDs checked, 139,231 kept (with abstract).
+  - Neuroscience Q2: done 2026-11-05 04:51; 128,911 checked, 88,310 kept. Every search in both Neuroscience
+    runs returned a result.
+  - **Multidisciplinary Q1 failed silently** (04:51–06:54). None of the 230 journal-year searches returned a
+    result, probably because of NCBI errors at that time; the same query works afterwards. The cause is in
+    `get_id_list`: it returned `None` on an unreadable response instead of raising, so the retry loop in
+    `scraping.py` stopped at once and skipped the journal-year without logging anything.
+  - **Fix:** `get_id_list` now raises, so failed searches are retried (`num_attempts`, `sleep_time`), and
+    `scraping.py` logs `Search failed after N attempts` for any that still fail. Successful searches behave
+    as before.
+  - Rerun: `Internal/Logs/run_early_scrape_multi_retry.sh`, started 2026-11-05 19:5x. The failed log is kept as
+    `phase1_scrape_early_Multidisciplinary_Q1.failed_ncbi.log`. No PMIDs had been checkpointed, so the rerun
+    is clean.

@@ -142,6 +142,7 @@ if __name__ == '__main__':
 
             # If no PubMed IDs were found, continue to the next journal
             if pubmed_ids is None:
+                print(f' Search failed after {num_attempts} attempts')
                 continue
 
             # Initialize the number of obtained articles

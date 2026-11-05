@@ -68,10 +68,9 @@ def get_id_list(query, email, max_results=5000):
                             retmax=max_results,
                             retmode='xml',
                             term=query)
-    try:
-        results = Entrez.read(handle)
-    except Exception as e:
-        return None
+    # Raise on an unreadable response so that the caller retries (returning None here
+    # made the caller skip the journal-year silently, e.g. during an NCBI outage)
+    results = Entrez.read(handle)
     return results['IdList']
 
 
