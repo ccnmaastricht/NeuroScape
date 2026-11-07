@@ -424,3 +424,8 @@ If a Voyage model is retired mid-run:
     As expected, the fit to the v1 clusters falls with distance from 1999, but only moderately.
   - 148,529 articles from 1980–1998 survive the classifier, rising from 2,356 (1980) to 13,133 (1998). For
     comparison, v1 has 12,404 in 1999, so the series is continuous across 1998/1999.
+- **Phase 6 provisional rebuilt** 2026-11-07 14:05 (log `phase6_provisional_early.log`).
+  - 689,022 articles: v1.0 461,316, v2.0-early 148,529, v2.0 60,993, v2.0-late 18,184. No duplicate PMIDs or DOIs.
+  - 3,446 HDF5 shards, as expected for 200 per shard.
+  - Citation links 11,533,443 (v1: 7,702,484). The two notes are in `assembly_report.json`.
+  - The October `…_1999-2025.csv` files in `Public/Data/CSV` are now stale (superseded by `…_1980-2025.csv`).
