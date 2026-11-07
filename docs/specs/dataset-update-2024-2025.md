@@ -402,3 +402,25 @@ If a Voyage model is retired mid-run:
     no longer retries those errors. This also protects the Phase 7 refresh.
   - The failed batch then went through (resumed at 87,877 processed). Phases 4–5 restarted; the failed log is
     `phase4_5_early.failed_431.log`.
+- **Phase 4 done** 2026-11-07 11:33. 1,398 batches with no failures; 9 `IncompleteRead` errors each succeeded on retry.
+- **Phase 5 failure and environment fix:**
+  - `assign_to_clusters.py` failed on import: `faiss-cpu` 1.8.0 is built for NumPy 1.x, but the env had NumPy
+    2.5.3. Matplotlib and seaborn had been pip-installed into `neuroscape_v2` on 2026-10-08 15:53, which pulled in
+    NumPy 2.5.3 and contourpy 1.4.
+  - Fix: NumPy restored to the lock version 1.26.4 and contourpy set to 1.3.3; matplotlib and seaborn still
+    import. Phases 2–3 had already run under NumPy 2.5.3; this has no effect on the embeddings (Voyage API and torch).
+- **Phase 5 done** 2026-11-07 13:42. 227,706 added articles assigned (44,905 delta + 182,801 new); median vote share
+  0.796.
+  - By period (n, median share, share < 0.5):
+
+    | Period | n | Median share | Share < 0.5 |
+    |---|---|---|---|
+    | 1980–84 | 17,493 | 0.701 | 27.4% |
+    | 1985–89 | 31,599 | 0.723 | 25.2% |
+    | 1990–94 | 50,485 | 0.764 | 22.4% |
+    | 1995–98 | 48,952 | 0.821 | 18.1% |
+    | 2024–25 | 34,272 | 0.840 | 16.4% |
+
+    As expected, the fit to the v1 clusters falls with distance from 1999, but only moderately.
+  - 148,529 articles from 1980–1998 survive the classifier, rising from 2,356 (1980) to 13,133 (1998). For
+    comparison, v1 has 12,404 in 1999, so the series is continuous across 1998/1999.
