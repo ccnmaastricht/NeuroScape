@@ -429,3 +429,36 @@ If a Voyage model is retired mid-run:
   - 3,446 HDF5 shards, as expected for 200 per shard.
   - Citation links 11,533,443 (v1: 7,702,484). The two notes are in `assembly_report.json`.
   - The October `…_1999-2025.csv` files in `Public/Data/CSV` are now stale (superseded by `…_1980-2025.csv`).
+
+### Pre-January checks — 2026-11-07
+
+- **Protection 1–2:** both v1 manifests verify (`sha256sum -c`: no mismatches, no missing files), and nothing under
+  `NeuroScape/Public` or `NeuroScape_original` is writable.
+- **v1 rows:** all 461,316 `v1.0` rows of the 1980–2025 provisional build are identical to v1 in every v1 column,
+  in v1 order.
+- **Citation refresh dry run on the extended set** (3,000 random articles, `citations_dryrun_2026-11.jsonl`):
+  - Every article has a DOI, including all of 1980–1998.
+  - Not found in CrossRef: 0.6% of the 628 `v2.0-early` articles and < 0.1% of the rest.
+  - Median count: 28 for `v2.0-early` and 31 for `v1.0`.
+- **Protection 3 (paper figures):**
+  - Setup: `results_00`–`03` at tag `aperture-neuro` (detached worktree) on `NeuroScape_original/Public`
+    (read-only), with figures written to a scratch root. The saved `table_01` LLM outputs were copied in so that
+    `results_03` loads them, and `OPENAI_API_KEY` was set to a dummy value, so no LLM calls were possible.
+  - Environment: disposable `neuroscape_paper` with matplotlib 3.8.3 (as in the saved SVGs), seaborn 0.13.2,
+    pandas 2.3.1, numpy 1.26.4, igraph 0.11.8, plotly 5.24.1 + kaleido 0.2.1, pycairo and pdfminer.six.
+  - Comparison: SVGs rasterized with Inkscape (1000 px wide) and compared pixel-wise with
+    `NeuroScape_original/Internal/Manuscript/Figures`.
+  - Figures 1, 2 and 4: 16 of 18 panels pixel-identical.
+    - Fig 1f: the bars are identical; only one axis label differs ("Nature neuroscience" → "Nature Neuroscience",
+      a journal rename in the notebook made after the saved panel).
+    - Fig 2c (cluster citation graph): `layout_auto()` has no seed, so the layout differs on every run. Same nodes;
+      the input graph is checksum-verified.
+  - Figure 3: only backups (Jul 2025) exist. 3b is pixel-identical. 3a (treemap) has the same tile sizes; two
+    equal-sized tiles swapped places and the font rendering differs (plotly/kaleido version). 3c is not produced
+    by the tagged code.
+  - `supplementary_table_02.csv` and `supplementary_table_04.csv` are byte-identical.
+  - **Verdict: the paper results reproduce at `aperture-neuro` on v1 data.**
+- **Release README draft:** `docs/release/README_v2.md`. Open decisions:
+  1. the growth window (1999–2025 vs 1980–2025);
+  2. whether to ship the raw Voyage embeddings as v1.0.1 did (`HDF5/VoyageAIEmbeddings/{Large,Lite}_02_Instruct`,
+     6.4 GB in v1); the v2 assembly does not build them yet.
