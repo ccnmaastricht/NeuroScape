@@ -4,10 +4,12 @@ import glob
 import time
 import h5py
 import urllib.parse
+import urllib.error
 import urllib.request
 import pandas as pd
 
 CROSSREF_URL = 'https://api.crossref.org/works'
+URL_TOO_LONG = (414, 431)  # HTTP status codes for an over-long request URL
 
 
 def normalize_doi(dois):
@@ -104,6 +106,11 @@ def crossref_request(params, email, num_attempts=5, sleep_time=10):
         try:
             with urllib.request.urlopen(request, timeout=120) as response:
                 return json.load(response)['message']['items']
+        except urllib.error.HTTPError as error:
+            # URL too long: retrying the same request cannot help (the caller splits the batch)
+            if error.code in URL_TOO_LONG or attempt == num_attempts - 1:
+                raise
+            time.sleep(sleep_time)
         except Exception:
             if attempt == num_attempts - 1:
                 raise
@@ -128,7 +135,17 @@ def fetch_crossref_works(dois, select, email):
         'rows': len(dois),
         'select': select
     }
-    items = crossref_request(params, email)
+    try:
+        items = crossref_request(params, email)
+    except urllib.error.HTTPError as error:
+        # Long DOIs (e.g. 1990s Wiley SICI DOIs) can make the URL too long: split the batch
+        if error.code not in URL_TOO_LONG or len(dois) == 1:
+            raise
+        half = len(dois) // 2
+        return {
+            **fetch_crossref_works(dois[:half], select, email),
+            **fetch_crossref_works(dois[half:], select, email)
+        }
 
     return {item['DOI'].lower(): item for item in items}
 

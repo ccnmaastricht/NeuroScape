@@ -390,3 +390,15 @@ If a Voyage model is retired mid-run:
   - Rerun: `Internal/Logs/run_early_scrape_multi_retry.sh`, started 2026-11-05 19:5x. The failed log is kept as
     `phase1_scrape_early_Multidisciplinary_Q1.failed_ncbi.log`. No PMIDs had been checkpointed, so the rerun
     is clean.
+- **Phases 2–3 on the extended set** (2026-11-06 18:17 – 2026-11-07 01:53, after the three derived HDF5 sets were cleared):
+  - New articles after cleaning and removing known ones: Neuroscience 308,307; Multidisciplinary 210,815. The
+    Multidisciplinary figure includes earlier-rejected 1999–2025 articles, whose lite embeddings come from the
+    checkpoint.
+  - After the classifier: 915 shards (about 183K articles), each with lite, large and domain embeddings.
+- **Phase 4 failure (2026-11-07 02:10) and fix:** CrossRef returned `HTTP 431 Request Header Fields Too Large` at
+  batch 88 of 1,486. The batch filter puts 100 DOIs into the URL, and long 1990s DOIs (e.g. Wiley SICI) push it
+  over the limit.
+  - Fix: `fetch_crossref_works` now splits the batch in half recursively on HTTP 414/431, and `crossref_request`
+    no longer retries those errors. This also protects the Phase 7 refresh.
+  - The failed batch then went through (resumed at 87,877 processed). Phases 4–5 restarted; the failed log is
+    `phase4_5_early.failed_431.log`.
